@@ -35,4 +35,14 @@ class AssertionTools
     {
         return MerkleTree::getRoot($assertion);
     }
+
+    public static function getSizeInMb(array $assertion): float
+    {
+        return strlen(json_encode($assertion)) / 1024 / 1024;
+    }
+
+    public static function getSizeInBytes(array $content): float
+    {
+        return strlen(json_encode($content, JSON_UNESCAPED_SLASHES));
+    }
 }

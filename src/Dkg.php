@@ -4,9 +4,10 @@ namespace Dkg;
 
 use Dkg\Communication\Infrastructure\HttpClient\HttpClient;
 use Dkg\Communication\NodeProxy;
-use Dkg\Communication\NodeProxyInterface;
 use Dkg\Services\AssetService\AssetService;
 use Dkg\Services\AssetService\AssetServiceInterface;
+use Dkg\Services\BlockchainService\BlockchainService;
+use Dkg\Services\BlockchainService\Proxy\Web3ProxyManager;
 use Dkg\Services\GraphService\GraphServiceInterface;
 use Dkg\Services\NodeService\NodeService;
 use Dkg\Services\NodeService\NodeServiceInterface;
@@ -16,25 +17,20 @@ use Dkg\Services\NodeService\NodeServiceInterface;
  */
 class Dkg implements DkgInterface
 {
-    /** @var NodeProxyInterface */
-    private $nodeProxy;
-
     /** @var NodeService */
     private $nodeService;
 
-    /** @var AssetService  */
+    /** @var AssetService */
     private $assetService;
 
-    public function __construct(?string $baseUrl)
+    public function __construct(DkgConfig $config)
     {
-        $this->nodeProxy = new NodeProxy(new HttpClient(), $baseUrl);
-        $this->nodeService = new NodeService($this->nodeProxy);
-        $this->assetService = new AssetService($this->nodeProxy);
-    }
+        $nodeProxy = new NodeProxy(new HttpClient(), $config->getUrl());
+        $web3ProxyManager = Web3ProxyManager::getInstance();
+        $blockchainService = new BlockchainService($web3ProxyManager, $config->getBlockchainParams());
 
-    public function graph(): GraphServiceInterface
-    {
-        // TODO: Implement graph() method.
+        $this->nodeService = new NodeService($nodeProxy);
+        $this->assetService = new AssetService($nodeProxy, $blockchainService);
     }
 
     public function asset(): AssetServiceInterface
@@ -45,5 +41,10 @@ class Dkg implements DkgInterface
     public function node(): NodeServiceInterface
     {
         return $this->nodeService;
+    }
+
+    public function graph(): GraphServiceInterface
+    {
+        // TODO: Implement graph() method.
     }
 }

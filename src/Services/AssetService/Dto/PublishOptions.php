@@ -2,30 +2,27 @@
 
 namespace Dkg\Services\AssetService\Dto;
 
-class PublishOptions
+use Dkg\Services\Constants;
+use Dkg\Services\RequestOptions;
+
+class PublishOptions extends RequestOptions
 {
     /** @var string|null */
-    private $visibility;
+    private $visibility = Constants::VISIBILITY_PUBLIC;
 
-    /** @var bool|null */
-    private $localStore;
+    /** @var bool */
+    private $localStore = false;
 
-    /** @var int|null */
-    private $holdingTimeInYears;
+    /** @var int */
+    private $holdingTimeInYears = Constants::PUBLISH_DEFAULT_HOLDING_TIME_IN_YEARS;
 
-    /** @var float|null */
-    private $tokenAmount;
-
-    /** @var int|null */
-    private $maxNumOfRetries;
-
-    /** @var string|null */
-    private $blockchain;
+    /** @var float */
+    private $tokenAmount = Constants::PUBLISH_DEFAULT_TOKEN_AMOUNT;
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getVisibility(): ?string
+    public function getVisibility(): string
     {
         return $this->visibility;
     }
@@ -39,9 +36,9 @@ class PublishOptions
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
-    public function isLocalStore(): ?bool
+    public function isLocalStore(): bool
     {
         return $this->localStore;
     }
@@ -84,37 +81,5 @@ class PublishOptions
     public function setTokenAmount(float $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getMaxNumOfRetries(): ?int
-    {
-        return $this->maxNumOfRetries;
-    }
-
-    /**
-     * @param int $maxNumOfRetries
-     */
-    public function setMaxNumOfRetries(int $maxNumOfRetries): void
-    {
-        $this->maxNumOfRetries = $maxNumOfRetries;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getBlockchain(): ?string
-    {
-        return $this->blockchain;
-    }
-
-    /**
-     * @param string $blockchain
-     */
-    public function setBlockchain(string $blockchain): void
-    {
-        $this->blockchain = $blockchain;
     }
 }

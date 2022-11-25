@@ -2,54 +2,65 @@
 
 namespace Dkg\Services\BlockchainService\Dto;
 
-class BlockchainConfig {
-    /** @var string */
-    private $rpc;
+/**
+ * This class is used as an argument for blockchain initialization.
+ */
+class BlockchainConfig
+{
+    /** @var string|null */
+    private $blockchainName;
 
-    /** @var string */
-    private $hubContract;
+    /** @var string|null */
+    private $privateKey;
 
-    /**
-     * @param string $rpc
-     * @param string $hubContract
-     */
-    public function __construct(string $rpc, string $hubContract)
-    {
-        $this->rpc = $rpc;
-        $this->hubContract = $hubContract;
-    }
-
+    /** @var string|null */
+    private $publicKey;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getRpc(): string
+    public function getBlockchainName(): ?string
     {
-        return $this->rpc;
+        return $this->blockchainName;
     }
 
     /**
-     * @param string $rpc
+     * @param string|null $blockchainName
      */
-    public function setRpc(string $rpc): void
+    public function setBlockchainName(?string $blockchainName): void
     {
-        $this->rpc = $rpc;
+        $this->blockchainName = $blockchainName;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHubContract(): string
+    public function getPrivateKey(): ?string
     {
-        return $this->hubContract;
+        return $this->privateKey;
     }
 
     /**
-     * @param string $hubContract
+     * @param string|null $privateKey
      */
-    public function setHubContract(string $hubContract): void
+    public function setPrivateKey(?string $privateKey): void
     {
-        $this->hubContract = $hubContract;
+        $this->privateKey = $privateKey;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPublicKey(): ?string
+    {
+        return $this->publicKey;
+    }
+
+    /**
+     * @param string|null $publicKey
+     */
+    public function setPublicKey(?string $publicKey): void
+    {
+        $this->publicKey = $publicKey;
     }
 }
-

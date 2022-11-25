@@ -2,15 +2,32 @@
 
 namespace Dkg\Services\AssetService;
 
+use Dkg\Communication\NodeProxyInterface;
 use Dkg\Exceptions\InvalidPublishRequestException;
 use Dkg\Services\AssertionTools\AssertionTools;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\BlockchainService;
+use Dkg\Services\BlockchainService\BlockchainServiceInterface;
+use Dkg\Services\BlockchainService\Dto\Asset;
+use Dkg\Services\Constants;
 use Exception;
 
 class AssetService implements AssetServiceInterface
 {
     private const MAX_CONTENT_SIZE_IN_MB = 2.5;
+
+    /** @var NodeProxyInterface */
+    private $nodeProxy;
+
+    /** @var BlockchainServiceInterface */
+    private $blockchainService;
+
+    // fixme change parameter type to interface
+    public function __construct(NodeProxyInterface $nodeProxy, BlockchainServiceInterface $blockchainService)
+    {
+        $this->nodeProxy = $nodeProxy;
+        $this->blockchainService = $blockchainService;
+    }
 
     /**
      * @throws InvalidPublishRequestException
@@ -18,14 +35,22 @@ class AssetService implements AssetServiceInterface
      */
     public function create(array $content, ?PublishOptions $options, $stepHooks = [])
     {
-        $this->validatePublishRequest($content, $options);
+        if(!isset($options)){
+            // set default options
+            $options = new PublishOptions();
+        }
 
         try {
+            $this->validatePublishRequest($content, $options);
             $assertion = AssertionTools::formatAssertion($content);
-            $assertionId = AssertionTools::calculateRoot($assertion);
 
+            $asset = new Asset();
+            $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
+            $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
 
-        } catch(Exception $e) {
+            $tokenId = $this->blockchainService->createAsset($asset, $options->getTokenAmount(), $options->getBlockchainConfig());
+            $o = 'o';
+        } catch (Exception $e) {
             throw new InvalidPublishRequestException($e->getMessage());
         }
     }
@@ -57,7 +82,10 @@ class AssetService implements AssetServiceInterface
     {
         $this->validateDatasetSize($content);
         $this->validateVisibility($options->getVisibility());
-        $this->validateBlockchain($options->getBlockchain());
+
+        if ($options->getBlockchainConfig()) {
+            $this->validateBlockchain($options->getBlockchainConfig()->getBlockchainName());
+        }
     }
 
     /**
@@ -65,7 +93,7 @@ class AssetService implements AssetServiceInterface
      */
     private function validateDatasetSize(array $content)
     {
-        $contentSize = strlen(json_encode($content)) / 1024 / 1024;
+        $contentSize = AssertionTools::getSizeInMb($content);
 
         if ($contentSize > self::MAX_CONTENT_SIZE_IN_MB) {
             throw new InvalidPublishRequestException("Maximum dataset size exceeded. $contentSize / " . self::MAX_CONTENT_SIZE_IN_MB . "MB");
@@ -88,8 +116,8 @@ class AssetService implements AssetServiceInterface
      */
     private function validateVisibility($visibility)
     {
-        if (!in_array($visibility, ['public', 'private'])) {
-            throw new InvalidPublishRequestException("'$visibility' options visibility prameter is not supported.");
+        if (!in_array($visibility, [Constants::VISIBILITY_PRIVATE, Constants::VISIBILITY_PUBLIC])) {
+            throw new InvalidPublishRequestException("'$visibility' options visibility parameter is not supported.");
         }
     }
 }

@@ -8,11 +8,13 @@ class BlockchainService implements BlockchainServiceInterface
 {
 
     /**
-     * @return string[]
+     * @param $blockchainName
+     * @return bool
      */
-    public static function getAvailableBlockchains(): array
+    public static function isBlockchainSupported($blockchainName): bool
     {
-        return array_keys(self::getBlockchainConfigs());
+        $supportedBlockchains = array_keys(self::getBlockchainConfigs());
+        return in_array($blockchainName, $supportedBlockchains);
     }
 
     /**

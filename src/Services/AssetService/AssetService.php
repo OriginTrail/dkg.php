@@ -77,7 +77,7 @@ class AssetService implements AssetServiceInterface
      */
     private function validateBlockchain($blockchain)
     {
-        if (!in_array($blockchain, BlockchainService::getAvailableBlockchains())) {
+        if (!BlockchainService::isBlockchainSupported($blockchain)) {
             throw new InvalidPublishRequestException("'$blockchain' options blockchain parameter is not supported.");
         }
     }

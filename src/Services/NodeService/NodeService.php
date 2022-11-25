@@ -7,7 +7,7 @@ use Dkg\Communication\Infrastructure\HttpClient\HttpMethods;
 use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
 use Dkg\Communication\NodeProxyInterface;
 
-class NodeService
+class NodeService implements NodeServiceInterface
 {
     /** @var NodeProxyInterface */
     private $nodeProxy;

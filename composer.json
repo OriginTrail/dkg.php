@@ -10,7 +10,11 @@
     ],
     "require": {
         "guzzlehttp/guzzle": "^7.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "digitalbazaar/json-ld": "^0.4.7",
+        "kornrunner/keccak": "^1.1",
+        "kornrunner/solidity": "^0.2.0",
+        "web3p/web3.php": "dev-master"
     },
     "autoload": {
         "psr-4": {

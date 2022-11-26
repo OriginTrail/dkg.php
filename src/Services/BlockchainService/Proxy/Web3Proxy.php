@@ -4,12 +4,14 @@ namespace Dkg\Services\BlockchainService\Proxy;
 
 use Dkg\Exceptions\BlockchainException;
 use Dkg\Services\BlockchainService\Proxy\Dto\BlockchainInfo;
+use Dkg\Services\Constants;
 use phpseclib\Math\BigInteger;
 use Web3\Contract;
 use Web3\Providers\HttpProvider;
 use Web3\RequestManagers\HttpRequestManager;
 use Web3\Utils;
 use Web3\Web3;
+use Web3p\EthereumTx\Transaction;
 
 class Web3Proxy implements Web3ProxyInterface
 {
@@ -50,20 +52,19 @@ class Web3Proxy implements Web3ProxyInterface
     }
 
 
+    /**
+     * @throws BlockchainException
+     */
     public function increaseAllowance(float $amount, string $publicKey, string $privateKey)
     {
-        $address = $this->assetRegistryContract->getToAddress();
-
         $this->executeContractFunction(
             $this->tokenContract,
+            $privateKey,
             'increaseAllowance',
-            $address,
             $amount,
             $publicKey,
             $privateKey
         );
-
-        $v = '';
     }
 
     private function initContracts($hubContract)
@@ -114,56 +115,67 @@ class Web3Proxy implements Web3ProxyInterface
         return (object)$response;
     }
 
-    private function executeContractFunction(Contract $contract, ...$arguments)
-    {
-        $transaction = $this->prepareTransaction($contract, ...$arguments);
-    }
-
     /**
      * @throws BlockchainException
      */
-    private function prepareTransaction(Contract $contract, ...$args)
+    private function executeContractFunction(Contract $contract, ...$args): object
     {
-        $privateAddress = array_pop($args);
-        $publicAddress = array_pop($args);
-
-        $address = $args[1];
+        $privateKey = array_pop($args);
+        $from = array_pop($args);
+        $to = $contract->getToAddress();
+        $chainId = $this->blockchainInfo->getChainId();
         $gasPrice = $this->getGasPrice($this->tokenContract);
         $rawTransactionData = '0x' . $this->tokenContract->getData(...$args);
 
         $txParams = [
-            'from' => $publicAddress,
-            'to' => $contract->getToAddress(),
-            'gasPrice' => '0x' . hexdec(dechex($gasPrice->toString())),
-            'data' => $rawTransactionData
+            'from' => $from,
+            'to' => $to,
+            'chainId' => $chainId,
+            'gasPrice' => '0x' . dechex($gasPrice->toString()),
+            'data' => $rawTransactionData,
         ];
 
         $gasLimit = $this->getGasLimit($contract, $txParams);
-        $txParams['gasLimit'] = '0x' . dechex($gasLimit);
-        $v = 't';
+        $txParams['gasLimit'] = '0x' . dechex($gasLimit->toString());
+
+        return $this->sendTransaction($contract, $txParams, $privateKey);
     }
 
     private function getGasPrice(Contract $contract): BigInteger
     {
         $gasPrice = null;
 
-        if($this->blockchainInfo->getName() === 'otp') {
-            $contract->getEth()->gasPrice(function ($err, $result) use(&$gasPrice) {
-                if($err) {
+        if ($this->blockchainInfo->getName() === 'otp') {
+            $contract->getEth()->gasPrice(function ($err, $result) use (&$gasPrice) {
+                if ($err) {
                     throw new BlockchainException($err->getMessage());
                 }
                 $gasPrice = $result;
             });
 
-            $gasPrice = new BigInteger((int) $gasPrice->toString() * 1000000);
+            $gasPrice = new BigInteger((int)$gasPrice->toString() * 1000000);
         } else {
-            $gasPrice = Utils::toWei("1000", "Gwei");
+            $gasPrice = Utils::toWei("100", "Gwei");
         }
 
         return $gasPrice;
     }
 
-    private function getGasLimit(Contract $contract, $txParams)
+    private function getTransactionCount(Contract $contract, string $ownerAccount): BigInteger
+    {
+        $transactionCount = null;
+
+        $contract->getEth()->getTransactionCount($ownerAccount, function ($err, $transactionCountResult) use (&$transactionCount) {
+            if ($err) {
+                throw new BlockchainException($err->getMessage());
+            }
+            $transactionCount = $transactionCountResult;
+        });
+
+        return $transactionCount;
+    }
+
+    private function getGasLimit(Contract $contract, $txParams): BigInteger
     {
         $estimatedGas = null;
 
@@ -174,7 +186,57 @@ class Web3Proxy implements Web3ProxyInterface
             $estimatedGas = $gas;
         });
 
+        if (!$estimatedGas->toString()) {
+            return Utils::toWei("1000", "Kwei");
+        }
+
         return $estimatedGas;
+    }
+
+    /**
+     * @throws BlockchainException
+     */
+    private function sendTransaction(Contract $contract, array $txParams, string $privateKey): object
+    {
+        $tx = new Transaction($txParams);
+        $signedTx = '0x' . $tx->sign($privateKey);
+
+        $txHash = null;
+
+        $contract->getEth()->sendRawTransaction($signedTx, function ($err, $txResult) use (&$txHash) {
+            if ($err) {
+                throw new BlockchainException($err->getMessage());
+            }
+            $txHash = $txResult;
+        });
+
+        return $this->pollForTxReceipt($contract, $txHash);
+    }
+
+    /**
+     * @param Contract $contract
+     * @param string $txHash
+     * @return object
+     * @throws BlockchainException
+     */
+    public function pollForTxReceipt(Contract $contract, string $txHash): object
+    {
+        for ($i = 0; $i <= Constants::BLOCKCHAIN_DEFAULT_TIMEOUT_TIME_IN_SEC; $i++) {
+            $contract->getEth()
+                ->getTransactionReceipt($txHash, function ($err, $txReceiptResult) use (&$txReceipt) {
+                    if ($err) {
+                        throw new BlockchainException($err->getMessage());
+                    }
+                    $txReceipt = $txReceiptResult;
+                });
+
+            if ($txReceipt) {
+                break;
+            }
+
+            sleep(1);
+        }
+        return $txReceipt;
     }
 
     private function loadAbi($abiName)

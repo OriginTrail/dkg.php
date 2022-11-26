@@ -15,4 +15,6 @@ class Constants
 
     public const STATUS_COMPLETED = 'COMPLETED';
     public const STATUS_FAILED = 'FAILED';
+
+    public const BLOCKCHAIN_DEFAULT_TIMEOUT_TIME_IN_SEC = 60;
 }

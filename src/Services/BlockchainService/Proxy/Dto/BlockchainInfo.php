@@ -16,16 +16,21 @@ class BlockchainInfo
     /** @var string */
     private $hubContract;
 
+    /** @var int */
+    private $chainId;
+
     /**
      * @param string $name
      * @param string $rpc
      * @param string $hubContract
+     * @param $chainId
      */
-    public function __construct(string $name, string $rpc, string $hubContract)
+    public function __construct(string $name, string $rpc, string $hubContract, $chainId)
     {
         $this->name = $name;
         $this->rpc = $rpc;
         $this->hubContract = $hubContract;
+        $this->chainId = $chainId;
     }
 
     /**
@@ -74,6 +79,22 @@ class BlockchainInfo
     public function setHubContract(string $hubContract): void
     {
         $this->hubContract = $hubContract;
+    }
+
+    /**
+     * @return int
+     */
+    public function getChainId(): int
+    {
+        return $this->chainId;
+    }
+
+    /**
+     * @param int $chainId
+     */
+    public function setChainId(int $chainId): void
+    {
+        $this->chainId = $chainId;
     }
 }
 

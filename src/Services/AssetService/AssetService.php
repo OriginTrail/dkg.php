@@ -35,7 +35,7 @@ class AssetService implements AssetServiceInterface
      */
     public function create(array $content, ?PublishOptions $options, $stepHooks = [])
     {
-        if(!isset($options)){
+        if (!isset($options)) {
             // set default options
             $options = new PublishOptions();
         }
@@ -43,16 +43,17 @@ class AssetService implements AssetServiceInterface
         try {
             $this->validatePublishRequest($content, $options);
             $assertion = AssertionTools::formatAssertion($content);
-
-            $asset = new Asset();
-            $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
-            $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
-
-            $tokenId = $this->blockchainService->createAsset($asset, $options->getTokenAmount(), $options->getBlockchainConfig());
-            $o = 'o';
         } catch (Exception $e) {
             throw new InvalidPublishRequestException($e->getMessage());
         }
+
+        $asset = new Asset();
+        $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
+        $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
+        $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
+        $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
+
+        [$assetAddress, $tokenId] = $this->blockchainService->createAsset($asset, $options);
     }
 
     public function get()

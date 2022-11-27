@@ -41,8 +41,18 @@ class AssertionTools
         return strlen(json_encode($assertion)) / 1024 / 1024;
     }
 
-    public static function getSizeInBytes(array $content): float
+    public static function getSizeInBytes(array $assertion): int
     {
-        return strlen(json_encode($content, JSON_UNESCAPED_SLASHES));
+        return strlen(json_encode($assertion, JSON_UNESCAPED_SLASHES));
+    }
+
+    public static function getTriplesCount(array $assertion): int
+    {
+        return count($assertion);
+    }
+
+    public static function getChunkCount(array $assertion): int
+    {
+        return count($assertion);
     }
 }

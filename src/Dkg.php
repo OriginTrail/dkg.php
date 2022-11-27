@@ -7,7 +7,7 @@ use Dkg\Communication\NodeProxy;
 use Dkg\Services\AssetService\AssetService;
 use Dkg\Services\AssetService\AssetServiceInterface;
 use Dkg\Services\BlockchainService\BlockchainService;
-use Dkg\Services\BlockchainService\Proxy\Web3ProxyManager;
+use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManager;
 use Dkg\Services\GraphService\GraphServiceInterface;
 use Dkg\Services\NodeService\NodeService;
 use Dkg\Services\NodeService\NodeServiceInterface;

@@ -14,7 +14,7 @@ class PublishOptions extends RequestOptions
     private $localStore = false;
 
     /** @var int */
-    private $holdingTimeInYears = Constants::PUBLISH_DEFAULT_HOLDING_TIME_IN_YEARS;
+    private $epochsNum = Constants::PUBLISH_DEFAULT_EPOCH_NUM;
 
     /** @var float */
     private $tokenAmount = Constants::PUBLISH_DEFAULT_TOKEN_AMOUNT;
@@ -54,17 +54,17 @@ class PublishOptions extends RequestOptions
     /**
      * @return int
      */
-    public function getHoldingTimeInYears(): int
+    public function getEpochsNum(): int
     {
-        return $this->holdingTimeInYears;
+        return $this->epochsNum;
     }
 
     /**
-     * @param int $holdingTimeInYears
+     * @param int $epochsNum
      */
-    public function setHoldingTimeInYears(int $holdingTimeInYears): void
+    public function setEpochsNum(int $epochsNum): void
     {
-        $this->holdingTimeInYears = $holdingTimeInYears;
+        $this->epochsNum = $epochsNum;
     }
 
     /**

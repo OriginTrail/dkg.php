@@ -53,7 +53,10 @@ class AssetService implements AssetServiceInterface
         $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
         $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
 
-        [$assetAddress, $tokenId] = $this->blockchainService->createAsset($asset, $options);
+        $uai = $this->blockchainService->createAsset($asset, $options);
+        $asset->setUai($uai);
+        $asset->setAssertion($assertion);
+
     }
 
     public function get()

@@ -94,9 +94,4 @@ class Web3ProxyManager implements Web3ProxyManagerInterface
             2160
         );
     }
-
-    public function getContentAssetAbi(): array
-    {
-        // TODO: Implement getContentAssetAbi() method.
-    }
 }

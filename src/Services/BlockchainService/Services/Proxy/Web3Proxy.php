@@ -76,7 +76,7 @@ class Web3Proxy implements Web3ProxyInterface
 
         $decoded = $this->decodeLogs($receipt, $abiEvent, $this->contentAssetContract);
 
-        if (count($decoded)) {
+        if (!count($decoded)) {
             throw new BlockchainException("No logs decoded. Tx hash: {$receipt->transactionHash}");
         }
 
@@ -338,5 +338,10 @@ class Web3Proxy implements Web3ProxyInterface
         }
 
         return $decoded;
+    }
+
+    public function getContentAssetContractAddress(): string
+    {
+        return $this->contentAssetContract->getToAddress();
     }
 }

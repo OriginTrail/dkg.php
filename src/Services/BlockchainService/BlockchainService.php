@@ -28,11 +28,7 @@ class BlockchainService implements BlockchainServiceInterface
         }
     }
 
-    /**
-     * @throws ConfigMissingException
-     * @throws BlockchainException
-     */
-    public function createAsset(Asset $asset, PublishOptions $options)
+    public function createAsset(Asset $asset, PublishOptions $options): string
     {
         $config = $this->getMergedConfig($options->getBlockchainConfig());
         $blockchainName = $config->getBlockchainName();
@@ -49,9 +45,15 @@ class BlockchainService implements BlockchainServiceInterface
             $options->getTokenAmount()
         ];
 
-        $response = $proxy->createAsset($createAssetArgs, $config->getPublicKey(), $config->getPrivateKey());
+        [$assetContract, $tokenId] = $proxy->createAsset($createAssetArgs, $config->getPublicKey(), $config->getPrivateKey());
+        $contractAddress = $proxy->getContentAssetContractAddress();
 
-        $v = '';
+        return $this->createUAI($blockchainName, $contractAddress, $tokenId);
+    }
+
+    private function createUAI(string $blockchainName, string $contractAddress, string $tokenId): string
+    {
+        return "did:$blockchainName:$contractAddress/$tokenId";
     }
 
     /**

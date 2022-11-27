@@ -32,4 +32,10 @@ interface Web3ProxyInterface
      * @throws BlockchainException
      */
     public function createAsset(array $args, string $publicKey, string $privateKey): array;
+
+    /**
+     * @return string
+     */
+    public function getContentAssetContractAddress(): string;
+
 }

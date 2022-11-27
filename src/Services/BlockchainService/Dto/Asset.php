@@ -4,6 +4,9 @@ namespace Dkg\Services\BlockchainService\Dto;
 
 class Asset
 {
+    /** @var array|null */
+    private $assertion;
+
     /** @var string */
     private $assertionId;
 
@@ -15,6 +18,25 @@ class Asset
 
     /** @var int */
     private $chunkCount;
+
+    /** @var string|null */
+    private $uai;
+
+    /**
+     * @return array|null
+     */
+    public function getAssertion(): ?array
+    {
+        return $this->assertion;
+    }
+
+    /**
+     * @param array|null $assertion
+     */
+    public function setAssertion(?array $assertion): void
+    {
+        $this->assertion = $assertion;
+    }
 
     /**
      * @return string
@@ -78,5 +100,21 @@ class Asset
     public function setChunkCount(int $chunkCount): void
     {
         $this->chunkCount = $chunkCount;
+    }
+
+    /**
+     * @return ?string
+     */
+    public function getUai(): ?string
+    {
+        return $this->uai;
+    }
+
+    /**
+     * @param string $uai
+     */
+    public function setUai(string $uai): void
+    {
+        $this->uai = $uai;
     }
 }

@@ -20,6 +20,15 @@ class Asset
     private $chunkCount;
 
     /** @var string|null */
+    private $blockchain;
+
+    /** @var string|null */
+    private $contract;
+
+    /** @var int|null */
+    private $tokenId;
+
+    /** @var string|null */
     private $uai;
 
     /**
@@ -100,6 +109,54 @@ class Asset
     public function setChunkCount(int $chunkCount): void
     {
         $this->chunkCount = $chunkCount;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBlockchain(): ?string
+    {
+        return $this->blockchain;
+    }
+
+    /**
+     * @param string|null $blockchain
+     */
+    public function setBlockchain(?string $blockchain): void
+    {
+        $this->blockchain = $blockchain;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getContract(): ?string
+    {
+        return $this->contract;
+    }
+
+    /**
+     * @param string|null $contract
+     */
+    public function setContract(?string $contract): void
+    {
+        $this->contract = $contract;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getTokenId(): ?int
+    {
+        return $this->tokenId;
+    }
+
+    /**
+     * @param int|null $tokenId
+     */
+    public function setTokenId(?int $tokenId): void
+    {
+        $this->tokenId = $tokenId;
     }
 
     /**

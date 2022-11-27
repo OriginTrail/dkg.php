@@ -52,11 +52,16 @@ class AssetService implements AssetServiceInterface
         $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
         $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
         $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
+        $asset->setUai($this->createUai(
+            $asset->getBlockchain(),
+            $asset->getContract(),
+            $asset->getTokenId()
+        ));
+        $asset = $this->blockchainService->createAsset($asset, $options);
 
-        $uai = $this->blockchainService->createAsset($asset, $options);
-        $asset->setUai($uai);
-        $asset->setAssertion($assertion);
 
+
+        $this->nodeProxy->publish($asset, $options);
     }
 
     public function get()
@@ -123,5 +128,10 @@ class AssetService implements AssetServiceInterface
         if (!in_array($visibility, [Constants::VISIBILITY_PRIVATE, Constants::VISIBILITY_PUBLIC])) {
             throw new InvalidPublishRequestException("'$visibility' options visibility parameter is not supported.");
         }
+    }
+
+    private function createUai(?string $blockchain, ?string $contract, ?int $tokenId): string
+    {
+        return "did:$blockchain:$contract/$tokenId";
     }
 }

@@ -13,9 +13,9 @@ interface BlockchainServiceInterface
      * Creates asset on blockchain.
      * @param Asset $asset
      * @param PublishOptions $options
-     * @return string UAI
+     * @return Asset asset with enhanced with blockchainName, contractAddress and $tokenId
      * @throws BlockchainException
      * @throws ConfigMissingException
      */
-    public function createAsset(Asset $asset, PublishOptions $options): string;
+    public function createAsset(Asset $asset, PublishOptions $options): Asset;
 }

@@ -27,7 +27,7 @@ class BlockchainService implements BlockchainServiceInterface
         }
     }
 
-    public function createAsset(Asset $asset, PublishOptions $options): string
+    public function createAsset(Asset $asset, PublishOptions $options): Asset
     {
         $config = $this->getMergedConfig($options->getBlockchainConfig());
         $blockchainName = $config->getBlockchainName();
@@ -47,12 +47,11 @@ class BlockchainService implements BlockchainServiceInterface
         [$assetContract, $tokenId] = $proxy->createAsset($createAssetArgs, $config->getPublicKey(), $config->getPrivateKey());
         $contractAddress = $proxy->getContentAssetContractAddress();
 
-        return $this->createUAI($blockchainName, $contractAddress, $tokenId);
-    }
+        $asset->setBlockchain($blockchainName);
+        $asset->setContract($contractAddress);
+        $asset->setTokenId((int)$tokenId);
 
-    private function createUAI(string $blockchainName, string $contractAddress, string $tokenId): string
-    {
-        return "did:$blockchainName:$contractAddress/$tokenId";
+        return $asset;
     }
 
     /**

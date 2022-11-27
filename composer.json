@@ -1,5 +1,5 @@
 {
-    "name": "veljkoterzic/dkg.php",
+    "name": "origintrail/dkg.php",
     "description": "PHP library for interaction with the OriginTrail Decentralized Knowledge Graph",
     "type": "library",
     "license": "Apache-2.0",

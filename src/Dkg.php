@@ -4,6 +4,7 @@ namespace Dkg;
 
 use Dkg\Communication\Infrastructure\HttpClient\HttpClient;
 use Dkg\Communication\NodeProxy;
+use Dkg\Config\DkgConfig;
 use Dkg\Services\AssetService\AssetService;
 use Dkg\Services\AssetService\AssetServiceInterface;
 use Dkg\Services\BlockchainService\BlockchainService;
@@ -25,9 +26,9 @@ class Dkg implements DkgInterface
 
     public function __construct(DkgConfig $config)
     {
-        $nodeProxy = new NodeProxy(new HttpClient(), $config->getUrl());
+        $nodeProxy = new NodeProxy(new HttpClient(), $config->getHttpConfig());
         $web3ProxyManager = Web3ProxyManager::getInstance();
-        $blockchainService = new BlockchainService($web3ProxyManager, $config->getBlockchainParams());
+        $blockchainService = new BlockchainService($web3ProxyManager, $config->getBlockchainConfig());
 
         $this->nodeService = new NodeService($nodeProxy);
         $this->assetService = new AssetService($nodeProxy, $blockchainService);

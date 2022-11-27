@@ -2,31 +2,75 @@
 
 namespace Dkg\Communication;
 
+use Dkg\Communication\Infrastructure\Exceptions\CommunicationException;
 use Dkg\Communication\Infrastructure\Exceptions\MaximumAttemptsExceededException;
 use Dkg\Communication\Infrastructure\HttpClient\HttpClient;
 use Dkg\Communication\Infrastructure\HttpClient\HttpClientInterface;
 use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
+use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Services\AssetService\Dto\Asset;
+use Dkg\Services\AssetService\Dto\PublishOptions;
+use Dkg\Services\Constants;
 
 class NodeProxy implements NodeProxyInterface
 {
-    private const MAX_NUMBER_OF_ATTEMPTS = 20;
-    private const WAITING_TIME_MILLISECONDS = 500 * 1000; // usleep() takes time in microseconds
     private const FINITE_STATUSES = ['FAILED', 'COMPLETED'];
 
     /** @var HttpClient */
     private $client;
-    /** @var string|null  */
-    private $baseURL;
 
-    public function __construct(HttpClientInterface $client, ?string $baseURL)
+    /** @var HttpConfig */
+    private $config;
+
+    public function __construct(HttpClientInterface $client, ?HttpConfig $config = null)
     {
         $this->client = $client;
-        $this->baseURL = $baseURL;
+
+        if ($config) {
+            $this->config = $config;
+        } else {
+            // initialize default
+            $this->config = new HttpConfig();
+        }
     }
 
-    public function processAsync($url, array $body = [], array $headers = []): HttpResponse
+    public function info(?string $baseUrl = null, ?string $authToken = null): HttpResponse
     {
-        $res = $this->client->post($this->getUrl($url), $body, $headers);
+        $url = $this->getBaseUrl($baseUrl) . '/info';
+        $authToken = $authToken ?? $this->config->getAuthToken();
+        $headers = $this->prepareHeaders($authToken);
+
+        return $this->client->get($url, $headers);
+    }
+
+
+    /**
+     * @throws MaximumAttemptsExceededException
+     * @throws ConfigMissingException
+     * @throws CommunicationException
+     * @throws InvalidPublishRequestException
+     */
+    public function publish(Asset $asset, PublishOptions $options): HttpResponse
+    {
+        $url = $this->getBaseUrl($options->getBaseUrl()) . '/api/post';
+        $body = $this->preparePublishBody($asset, $options);
+        $headers = $this->prepareHeaders($options->getAuthToken());
+
+        return $this->processAsync($url, $body, $headers);
+    }
+
+    /**
+     * @param $url
+     * @param array $body
+     * @param array $headers
+     * @return HttpResponse
+     * @throws CommunicationException
+     * @throws MaximumAttemptsExceededException
+     */
+    private function processAsync($url, array $body = [], array $headers = []): HttpResponse
+    {
+        $res = $this->client->post($url, $body, $headers);
 
         if (!$res->isSuccessful()) {
             return $res;
@@ -35,36 +79,34 @@ class NodeProxy implements NodeProxyInterface
         $counter = 0;
         $handlerId = $res->getBodyAsObject()->handler_id;
 
-        while ($counter++ < self::MAX_NUMBER_OF_ATTEMPTS) {
+        while ($counter++ < $this->config->getMaxNumOfRetries()) {
             $res = $this->client->get($url . "/result/$handlerId", $headers);
 
             if (!$res->isSuccessful() || $this->isProcessingFinished($res)) {
                 return $res;
             }
 
-            usleep(self::WAITING_TIME_MILLISECONDS);
+            // usleep measures time in microseconds, retryFrequency is in ms
+            usleep($this->config->getRetryFrequency() * 1000);
         }
 
-        throw new MaximumAttemptsExceededException();
-    }
-
-    public function sendRequest($method, $url, array $headers = [], array $body = []): HttpResponse
-    {
-        return $this->client->sendRequest($method, $this->getUrl($url), $headers, $body);
+        throw new MaximumAttemptsExceededException("Exceeded {$this->config->getMaxNumOfRetries()} number of retries. Handler id: $handlerId");
     }
 
     /**
-     * Prepends baseURL to provided url if set
-     * @param $url
+     * Returns BaseURL.
+     * Provided baseUrl overrides default baseURL.
+     * @param string|null $baseUrl
      * @return string
+     * @throws ConfigMissingException
      */
-    private function getUrl($url): string
+    private function getBaseUrl(?string $baseUrl): string
     {
-        if(isset($this->baseURL)) {
-            return $this->baseURL . $url;
+        if (!$baseUrl && !$this->config->getBaseUrl()) {
+            throw new ConfigMissingException('No base URL provided.');
         }
 
-        return $url;
+        return $baseUrl ?? $this->config->getBaseUrl();
     }
 
     /**
@@ -74,5 +116,44 @@ class NodeProxy implements NodeProxyInterface
     private function isProcessingFinished($response): bool
     {
         return in_array($response->getBodyAsObject()->status, self::FINITE_STATUSES);
+    }
+
+    /**
+     * @throws InvalidPublishRequestException
+     */
+    private function preparePublishBody(Asset $asset, PublishOptions $options): array
+    {
+        $baseBody = [
+            'publishType' => $options->getPublishType(),
+            'assertionId' => $asset->getAssertionId(),
+            'assertion' => $asset->getAssertion()
+        ];
+
+        switch ($options->getPublishType()) {
+            case Constants::PUBLISH_TYPE_ASSET:
+                $body = [
+                    'blockchain' => $asset->getBlockchain(),
+                    'contract' => $asset->getContract(),
+                    'tokenId' => $asset->getTokenId(),
+                    'hashFunctionId' => $options->getHashFunctionId(),
+                    'localStore' => $options->isLocalStore()
+                ];
+                break;
+            default:
+                throw new InvalidPublishRequestException("Unsupported publish type '{$options->getPublishType()}'.");
+        }
+
+        return array_merge($baseBody, $body);
+    }
+
+    private function prepareHeaders(?string $authToken): ?array
+    {
+        if ($authToken) {
+            return [
+                'Authorization' => "Bearer $authToken"
+            ];
+        }
+
+        return [];
     }
 }

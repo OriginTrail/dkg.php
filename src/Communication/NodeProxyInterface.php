@@ -12,11 +12,12 @@ interface NodeProxyInterface
 {
     /**
      * @param string|null $baseUrl
+     * @param string|null $authToken
      * @return HttpResponse
      * @throws ConfigMissingException
      * @throws CommunicationException
      */
-    public function info(?string $baseUrl): HttpResponse;
+    public function info(?string $baseUrl, ?string $authToken): HttpResponse;
 
     public function publish(Asset $asset, PublishOptions $options);
 }

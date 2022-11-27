@@ -9,7 +9,6 @@ use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
-use Dkg\Services\Constants;
 use Exception;
 
 class AssetService implements AssetServiceInterface
@@ -57,9 +56,8 @@ class AssetService implements AssetServiceInterface
             $asset->getContract(),
             $asset->getTokenId()
         ));
+
         $asset = $this->blockchainService->createAsset($asset, $options);
-
-
 
         $this->nodeProxy->publish($asset, $options);
     }
@@ -90,7 +88,6 @@ class AssetService implements AssetServiceInterface
     private function validatePublishRequest(array $content, ?PublishOptions $options)
     {
         $this->validateDatasetSize($content);
-        $this->validateVisibility($options->getVisibility());
 
         if ($options->getBlockchainConfig()) {
             $this->validateBlockchain($options->getBlockchainConfig()->getBlockchainName());
@@ -116,17 +113,6 @@ class AssetService implements AssetServiceInterface
     {
         if (!BlockchainService::isBlockchainSupported($blockchain)) {
             throw new InvalidPublishRequestException("'$blockchain' options blockchain parameter is not supported.");
-        }
-    }
-
-    /**
-     * @param $visibility
-     * @throws InvalidPublishRequestException
-     */
-    private function validateVisibility($visibility)
-    {
-        if (!in_array($visibility, [Constants::VISIBILITY_PRIVATE, Constants::VISIBILITY_PUBLIC])) {
-            throw new InvalidPublishRequestException("'$visibility' options visibility parameter is not supported.");
         }
     }
 

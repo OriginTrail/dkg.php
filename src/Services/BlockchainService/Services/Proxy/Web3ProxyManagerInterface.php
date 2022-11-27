@@ -1,6 +1,6 @@
 <?php
 
-namespace Dkg\Services\BlockchainService\Proxy;
+namespace Dkg\Services\BlockchainService\Services\Proxy;
 
 interface Web3ProxyManagerInterface
 {
@@ -23,4 +23,6 @@ interface Web3ProxyManagerInterface
      * @return Web3ProxyInterface
      */
     public function getProxy(string $blockchainName): Web3ProxyInterface;
+
+    public function getContentAssetAbi(): array;
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Dkg\Services\BlockchainService\Proxy;
+namespace Dkg\Services\BlockchainService\Services\Proxy;
 
-use Dkg\Services\BlockchainService\Proxy\Dto\BlockchainInfo;
+use Dkg\Services\BlockchainService\Services\Proxy\Dto\BlockchainInfo;
 use InvalidArgumentException;
 
 class Web3ProxyManager implements Web3ProxyManagerInterface
@@ -93,5 +93,10 @@ class Web3ProxyManager implements Web3ProxyManagerInterface
             '0xc9184C1A0CE150a882DC3151Def25075bdAf069C',
             2160
         );
+    }
+
+    public function getContentAssetAbi(): array
+    {
+        // TODO: Implement getContentAssetAbi() method.
     }
 }

@@ -2,14 +2,13 @@
 
 namespace Dkg\Services\BlockchainService;
 
+use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\ConfigMissingException;
-use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
+use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\Dto\Asset;
-use Dkg\Services\BlockchainService\Proxy\Web3ProxyInterface;
-use Dkg\Services\BlockchainService\Proxy\Web3ProxyManager;
-use Dkg\Services\BlockchainService\Proxy\Web3ProxyManagerInterface;
-use Exception;
-use Web3\Web3;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
+use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManager;
+use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManagerInterface;
 
 class BlockchainService implements BlockchainServiceInterface
 {
@@ -31,14 +30,28 @@ class BlockchainService implements BlockchainServiceInterface
 
     /**
      * @throws ConfigMissingException
+     * @throws BlockchainException
      */
-    public function createAsset(Asset $asset, float $tokenAmount, ?BlockchainConfig $config)
+    public function createAsset(Asset $asset, PublishOptions $options)
     {
-        $mergedConfig = $this->getMergedConfig($config);
-        $blockchainName = $mergedConfig->getBlockchainName();
+        $config = $this->getMergedConfig($options->getBlockchainConfig());
+        $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($tokenAmount, $mergedConfig->getPublicKey(), $mergedConfig->getPrivateKey());
+        $proxy->increaseAllowance($options->getTokenAmount(), $config->getPublicKey(), $config->getPrivateKey());
+
+        $createAssetArgs = [
+            $asset->getAssertionId(),
+            $asset->getAssertionSize(),
+            $asset->getTriplesCount(),
+            $options->getEpochsNum(),
+            $asset->getChunkCount(),
+            $options->getTokenAmount()
+        ];
+
+        $response = $proxy->createAsset($createAssetArgs, $config->getPublicKey(), $config->getPrivateKey());
+
+        $v = '';
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Dkg\Services\BlockchainService\Proxy\Dto;
+namespace Dkg\Services\BlockchainService\Services\Proxy\Dto;
 
 /**
  * The class is used to hold Blockchain configuration

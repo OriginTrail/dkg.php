@@ -1,6 +1,6 @@
 <?php
 
-namespace Dkg\Services\BlockchainService\Dto;
+namespace Dkg\Services\AssetService\Dto;
 
 class Asset
 {

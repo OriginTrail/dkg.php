@@ -4,8 +4,8 @@ namespace Dkg\Services\BlockchainService;
 
 use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
-use Dkg\Services\BlockchainService\Dto\Asset;
 
 interface BlockchainServiceInterface
 {

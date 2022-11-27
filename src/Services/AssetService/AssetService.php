@@ -5,10 +5,10 @@ namespace Dkg\Services\AssetService;
 use Dkg\Communication\NodeProxyInterface;
 use Dkg\Exceptions\InvalidPublishRequestException;
 use Dkg\Services\AssertionTools\AssertionTools;
+use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
-use Dkg\Services\BlockchainService\Dto\Asset;
 use Dkg\Services\Constants;
 use Exception;
 

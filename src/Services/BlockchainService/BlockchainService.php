@@ -2,10 +2,9 @@
 
 namespace Dkg\Services\BlockchainService;
 
-use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
-use Dkg\Services\BlockchainService\Dto\Asset;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManager;
 use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManagerInterface;

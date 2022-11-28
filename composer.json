@@ -4,12 +4,23 @@
     "type": "library",
     "license": "Apache-2.0",
     "version": "0.1.0",
+    "keywords": [
+        "origintrail",
+        "knowledge",
+        "graph",
+        "dkg",
+        "blockchain",
+        "ot-node",
+        "v6"
+    ],
+    "homepage": "https://github.com/OriginTrail/dkg.php",
     "authors": [
         {
             "name": "Trace Labs Group"
         }
     ],
     "require": {
+        "php": "^7.3",
         "guzzlehttp/guzzle": "^7.0",
         "ext-json": "*",
         "digitalbazaar/json-ld": "^0.4.7",

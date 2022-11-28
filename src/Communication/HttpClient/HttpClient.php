@@ -64,26 +64,41 @@ class HttpClient implements HttpClientInterface
         ];
     }
 
+    /**
+     * @throws NodeProxyException
+     */
     public function get(string $url, $headers = []): HttpResponse
     {
         return $this->sendRequest(HttpMethods::GET_METHOD, $url, $headers);
     }
 
+    /**
+     * @throws NodeProxyException
+     */
     public function post(string $url, $body = [], $headers = []): HttpResponse
     {
         return $this->sendRequest(HttpMethods::POST_METHOD, $url, $headers, $body);
     }
 
+    /**
+     * @throws NodeProxyException
+     */
     public function put(string $url, $body = [], $headers = []): HttpResponse
     {
         return $this->sendRequest(HttpMethods::PUT_METHOD, $url, $headers, $body);
     }
 
+    /**
+     * @throws NodeProxyException
+     */
     public function delete(string $url, $body = [], $headers = []): HttpResponse
     {
         return $this->sendRequest(HttpMethods::DELETE_METHOD, $url, $headers, $body);
     }
 
+    /**
+     * @throws NodeProxyException
+     */
     public function patch(string $url, $body = [], $headers = []): HttpResponse
     {
         return $this->sendRequest(HttpMethods::PATCH_METHOD, $url, $headers, $body);

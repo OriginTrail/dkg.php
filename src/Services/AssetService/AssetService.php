@@ -36,6 +36,7 @@ class AssetService implements AssetServiceInterface
      * @throws NodeProxyException
      * @throws BlockchainException
      * @throws ServiceMisconfigurationException
+     * @throws Exception
      */
     public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset
     {

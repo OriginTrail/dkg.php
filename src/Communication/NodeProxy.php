@@ -137,7 +137,7 @@ class NodeProxy implements NodeProxyInterface
      * @param HttpResponse $response
      * @return bool
      */
-    private function isProcessingFinished($response): bool
+    private function isProcessingFinished(HttpResponse $response): bool
     {
         return in_array($response->getBodyAsObject()->status, self::FINITE_STATUSES);
     }

@@ -16,7 +16,10 @@ interface AssetServiceInterface
     public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset;
 
     public function get();
+
     public function update();
+
     public function transfer();
+
     public function getOwner();
 }

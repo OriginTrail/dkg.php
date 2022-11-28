@@ -12,6 +12,8 @@ interface DkgInterface
      * Returns node interface
      */
     public function node(): NodeServiceInterface;
+
     public function asset(): AssetServiceInterface;
+
     public function graph(): GraphServiceInterface;
 }

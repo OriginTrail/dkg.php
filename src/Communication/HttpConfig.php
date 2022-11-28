@@ -91,8 +91,7 @@ class HttpConfig
         return
             $this->maxNumOfRetries &&
             $this->retryFrequency &&
-            $this->baseUrl &&
-            $this->authToken;
+            $this->baseUrl;
     }
 
     public static function default(): HttpConfig

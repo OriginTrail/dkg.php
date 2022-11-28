@@ -40,8 +40,7 @@ class AssetService implements AssetServiceInterface
     public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset
     {
         if (!isset($options)) {
-            // set default options
-            $options = new PublishOptions();
+            $options = PublishOptions::default();
         }
 
         try {
@@ -104,6 +103,10 @@ class AssetService implements AssetServiceInterface
     private function validatePublishRequest(array $content, ?PublishOptions $options)
     {
         $this->validateDatasetSize($content);
+
+        if (!$options->validate()) {
+            throw new InvalidPublishRequestException('Some of publish options fields are missing.');
+        }
 
         if ($options->getBlockchainConfig()) {
             $this->validateBlockchain($options->getBlockchainConfig()->getBlockchainName());

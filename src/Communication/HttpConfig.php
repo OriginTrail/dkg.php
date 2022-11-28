@@ -6,11 +6,11 @@ use Dkg\Config\Constants;
 
 class HttpConfig
 {
-    /** @var int */
-    private $maxNumOfRetries = Constants::HTTP_DEFAULT_MAX_NUM_OF_RETRIES;
+    /** @var int|null */
+    private $maxNumOfRetries;
 
-    /** @var int */
-    private $retryFrequency = Constants::HTTP_DEFAULT_POLL_FREQUENCY_IN_MS;
+    /** @var int|null */
+    private $retryFrequency;
 
     /** @var string|null */
     private $baseUrl;
@@ -19,33 +19,33 @@ class HttpConfig
     private $authToken;
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getMaxNumOfRetries(): int
+    public function getMaxNumOfRetries(): ?int
     {
         return $this->maxNumOfRetries;
     }
 
     /**
-     * @param int $maxNumOfRetries
+     * @param int|null $maxNumOfRetries
      */
-    public function setMaxNumOfRetries(int $maxNumOfRetries): void
+    public function setMaxNumOfRetries(?int $maxNumOfRetries): void
     {
         $this->maxNumOfRetries = $maxNumOfRetries;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getRetryFrequency()
+    public function getRetryFrequency(): ?int
     {
         return $this->retryFrequency;
     }
 
     /**
-     * @param int $retryFrequency retry frequency in ms
+     * @param int|null $retryFrequency retry frequency in ms
      */
-    public function setRetryFrequency($retryFrequency): void
+    public function setRetryFrequency(?int $retryFrequency): void
     {
         $this->retryFrequency = $retryFrequency;
     }
@@ -80,5 +80,27 @@ class HttpConfig
     public function setAuthToken(?string $authToken): void
     {
         $this->authToken = $authToken;
+    }
+
+    /**
+     * Returns bool indicator whether config is validated
+     * @return bool
+     */
+    public function validate(): bool
+    {
+        return
+            $this->maxNumOfRetries &&
+            $this->retryFrequency &&
+            $this->baseUrl &&
+            $this->authToken;
+    }
+
+    public static function default(): HttpConfig
+    {
+        $config = new HttpConfig();
+        $config->setMaxNumOfRetries(Constants::HTTP_DEFAULT_MAX_NUM_OF_RETRIES);
+        $config->setRetryFrequency(Constants::HTTP_DEFAULT_POLL_FREQUENCY_IN_MS);
+
+        return $config;
     }
 }

@@ -15,8 +15,8 @@ class DkgConfig
 
     public function __construct()
     {
-        $this->httpConfig = new HttpConfig();
-        $this->blockchainConfig = new BlockchainConfig();
+        $this->httpConfig = HttpConfig::default();
+        $this->blockchainConfig = BlockchainConfig::default();
     }
 
     /**

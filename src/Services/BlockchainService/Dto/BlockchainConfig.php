@@ -18,11 +18,11 @@ class BlockchainConfig
     /** @var  string|null */
     private $publicKey;
 
-    /** @var int Used for polling tx receipt */
-    private $numOfRetries = Constants::BLOCKCHAIN_DEFAULT_NUM_OF_RETRIES;
+    /** @var int|null Used for polling tx receipt */
+    private $numOfRetries;
 
-    /** @var int Used for polling tx receipt */
-    private $pollFrequency = Constants::BLOCKCHAIN_DEFAULT_POLL_FREQUENCY_IN_MS;
+    /** @var int|null Used for polling tx receipt */
+    private $pollFrequency;
 
     /**
      * @return string|null
@@ -73,34 +73,59 @@ class BlockchainConfig
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getNumOfRetries(): int
+    public function getNumOfRetries(): ?int
     {
         return $this->numOfRetries;
     }
 
     /**
-     * @param int $numOfRetries
+     * @param int|null $numOfRetries
      */
-    public function setNumOfRetries(int $numOfRetries): void
+    public function setNumOfRetries(?int $numOfRetries): void
     {
         $this->numOfRetries = $numOfRetries;
     }
 
     /**
-     * @return int
+     * Gets polling frequency in ms
+     * @return int|null
      */
-    public function getPollFrequency(): int
+    public function getPollFrequency(): ?int
     {
         return $this->pollFrequency;
     }
 
     /**
-     * @param int $pollFrequency
+     * Sets polling frequency in ms
+     * @param int|null $pollFrequency
      */
-    public function setPollFrequency(int $pollFrequency): void
+    public function setPollFrequency(?int $pollFrequency): void
     {
         $this->pollFrequency = $pollFrequency;
+    }
+
+    /**
+     * Returns bool indicator whether config is validated
+     * @return bool
+     */
+    public function validate(): bool
+    {
+        return
+            $this->blockchainName &&
+            $this->privateKey &&
+            $this->publicKey &&
+            $this->numOfRetries &&
+            $this->pollFrequency;
+    }
+
+    public static function default(): BlockchainConfig
+    {
+        $config = new BlockchainConfig();
+        $config->setNumOfRetries(Constants::BLOCKCHAIN_DEFAULT_NUM_OF_RETRIES);
+        $config->setPollFrequency(Constants::BLOCKCHAIN_DEFAULT_POLL_FREQUENCY_IN_MS);
+
+        return $config;
     }
 }

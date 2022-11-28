@@ -19,13 +19,6 @@ class NodeService implements NodeServiceInterface
 
     public function getInfo(?HttpConfig $config = null): HttpResponse
     {
-        if ($config) {
-            return $this->nodeProxy->info(
-                $config->getBaseUrl(),
-                $config->getAuthToken()
-            );
-        }
-
-        return $this->nodeProxy->info();
+        return $this->nodeProxy->info($config);
     }
 }

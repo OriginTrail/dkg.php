@@ -20,22 +20,21 @@ class NodeProxy implements NodeProxyInterface
     private $client;
 
     /** @var HttpConfig */
-    private $config;
+    private $baseConfig;
 
     public function __construct(HttpClientInterface $client, ?HttpConfig $config = null)
     {
         $this->client = $client;
-
-        if ($config) {
-            $this->config = $config;
-        } else {
-            // initialize default
-            $this->config = new HttpConfig();
-        }
+        $this->baseConfig = $config;
     }
 
+    /**
+     * @throws ServiceMisconfigurationException
+     * @throws NodeProxyException
+     */
     public function info(?HttpConfig $config = null): HttpResponse
     {
+        $config = $this->mergeConfig($config);
         $url = $this->getBaseUrl($config) . '/info';
         $headers = $this->prepareHeaders($config);
 
@@ -74,7 +73,7 @@ class NodeProxy implements NodeProxyInterface
         $counter = 0;
         $operationId = $res->getBodyAsObject()->operationId;
 
-        while ($counter++ < $this->config->getMaxNumOfRetries()) {
+        while ($counter++ < $this->baseConfig->getMaxNumOfRetries()) {
             $res = $this->client->get($url . "/$operationId", $headers);
 
             if (!$res->isSuccessful() || $this->isProcessingFinished($res)) {
@@ -87,10 +86,10 @@ class NodeProxy implements NodeProxyInterface
             }
 
             // usleep measures time in microseconds, retryFrequency is in ms
-            usleep($this->config->getRetryFrequency() * 1000);
+            usleep($this->baseConfig->getRetryFrequency() * 1000);
         }
 
-        throw new NodeProxyException("Exceeded {$this->config->getMaxNumOfRetries()} number of retries.", ['operationId' => $operationId]);
+        throw new NodeProxyException("Exceeded {$this->baseConfig->getMaxNumOfRetries()} number of retries.", ['operationId' => $operationId]);
     }
 
     /**
@@ -102,15 +101,15 @@ class NodeProxy implements NodeProxyInterface
      */
     private function getBaseUrl(?HttpConfig $config): string
     {
-        if ((!$config || !$config->getBaseUrl()) && !$this->config->getBaseUrl()) {
+        if ((!$config || !$config->getBaseUrl()) && !$this->baseConfig->getBaseUrl()) {
             throw new ServiceMisconfigurationException('No base URL provided.');
         }
 
         if ($config) {
-            return $config->getBaseUrl() ?? $this->config->getBaseUrl();
+            return $config->getBaseUrl() ?? $this->baseConfig->getBaseUrl();
         }
 
-        return $this->config->getBaseUrl();
+        return $this->baseConfig->getBaseUrl();
     }
 
     /**
@@ -119,14 +118,14 @@ class NodeProxy implements NodeProxyInterface
      */
     private function prepareHeaders(?HttpConfig $config): ?array
     {
-        if ((!$config || !$config->getAuthToken()) && !$this->config->getAuthToken()) {
+        if ((!$config || !$config->getAuthToken()) && !$this->baseConfig->getAuthToken()) {
             return [];
         }
 
         if ($config) {
-            $token = $config->getAuthToken() ?? $this->config->getAuthToken();
+            $token = $config->getAuthToken() ?? $this->baseConfig->getAuthToken();
         } else {
-            $token = $this->config->getAuthToken();
+            $token = $this->baseConfig->getAuthToken();
         }
 
         return [
@@ -169,5 +168,48 @@ class NodeProxy implements NodeProxyInterface
         }
 
         return array_merge($baseBody, $body);
+    }
+
+    /**
+     * @throws ServiceMisconfigurationException
+     */
+    private function mergeConfig(?HttpConfig $config): HttpConfig
+    {
+        $mergedConfig = new HttpConfig();
+
+        if (!$config && !$this->baseConfig) {
+            throw new ServiceMisconfigurationException("No config is provided to NodeProxy");
+        }
+
+        if ($this->baseConfig) {
+            $mergedConfig->setMaxNumOfRetries($this->baseConfig->getMaxNumOfRetries());
+            $mergedConfig->setRetryFrequency($this->baseConfig->getRetryFrequency());
+            $mergedConfig->setBaseUrl($this->baseConfig->getBaseUrl());
+            $mergedConfig->setAuthToken($this->baseConfig->getAuthToken());
+        }
+
+        if ($config) {
+            if ($config->getMaxNumOfRetries()) {
+                $mergedConfig->setMaxNumOfRetries($config->getMaxNumOfRetries());
+            }
+
+            if ($config->getRetryFrequency()) {
+                $mergedConfig->setRetryFrequency($config->getRetryFrequency());
+            }
+
+            if ($config->getBaseUrl()) {
+                $mergedConfig->setBaseUrl($config->getBaseUrl());
+            }
+
+            if ($config->getAuthToken()) {
+                $mergedConfig->setAuthToken($config->getAuthToken());
+            }
+        }
+
+        if (!$mergedConfig->validate()) {
+            throw new ServiceMisconfigurationException("Missing some of config properties for NodeProxy.");
+        }
+
+        return $mergedConfig;
     }
 }

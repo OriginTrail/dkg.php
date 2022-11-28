@@ -57,7 +57,7 @@ class BlockchainService implements BlockchainServiceInterface
         $mergedConfig = new BlockchainConfig();
 
         if (!$config && !$this->baseConfig) {
-            throw new ServiceMisconfigurationException("No blockchain is provided to BlockchainService.");
+            throw new ServiceMisconfigurationException("No config is provided to BlockchainService.");
         }
 
         if ($this->baseConfig) {
@@ -78,8 +78,17 @@ class BlockchainService implements BlockchainServiceInterface
                 $mergedConfig->setPrivateKey($config->getPrivateKey());
             }
 
-            $mergedConfig->setNumOfRetries($config->getNumOfRetries());
-            $mergedConfig->setPollFrequency($config->getPollFrequency());
+            if ($config->getNumOfRetries()) {
+                $mergedConfig->setNumOfRetries($config->getNumOfRetries());
+            }
+
+            if ($config->getPollFrequency()) {
+                $mergedConfig->setPollFrequency($config->getPollFrequency());
+            }
+        }
+
+        if (!$mergedConfig->validate()) {
+            throw new ServiceMisconfigurationException("Missing some non-default properties for BlockchainService");
         }
 
         return $mergedConfig;

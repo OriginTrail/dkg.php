@@ -21,10 +21,6 @@ class BlockchainService implements BlockchainServiceInterface
     {
         $this->config = $config;
         $this->web3ProxyManager = $web3ProxyManager;
-
-        if ($config) {
-            $this->web3ProxyManager->initializeProxy($config->getBlockchainName());
-        }
     }
 
     public function createAsset(Asset $asset, PublishOptions $options): Asset
@@ -49,7 +45,7 @@ class BlockchainService implements BlockchainServiceInterface
 
         $asset->setBlockchain($blockchainName);
         $asset->setContract($contractAddress);
-        $asset->setTokenId((int)$tokenId);
+        $asset->setTokenId((int)$tokenId->toString());
 
         return $asset;
     }

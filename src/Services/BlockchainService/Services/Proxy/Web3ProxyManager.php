@@ -36,7 +36,7 @@ class Web3ProxyManager implements Web3ProxyManagerInterface
      * @return void
      * @throws InvalidArgumentException Provided blockchain doesn't exist.
      */
-    public function initializeProxy(string $blockchainName)
+    private function initializeProxy(string $blockchainName)
     {
         $blockchainInfo = $this->infoMap[$blockchainName];
 

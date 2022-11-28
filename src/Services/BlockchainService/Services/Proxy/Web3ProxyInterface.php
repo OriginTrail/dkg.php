@@ -3,6 +3,7 @@
 namespace Dkg\Services\BlockchainService\Services\Proxy;
 
 use Dkg\Exceptions\BlockchainException;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 use Dkg\Services\BlockchainService\Services\Proxy\Dto\BlockchainInfo;
 
 interface Web3ProxyInterface
@@ -17,25 +18,17 @@ interface Web3ProxyInterface
     /**
      * Triggers increaseAllowance function on the contract.
      * @param float $amount
-     * @param string $publicKey
-     * @param string $privateKey
+     * @param BlockchainConfig $config
      * @return mixed
      * @throws BlockchainException
      */
-    public function increaseAllowance(float $amount, string $publicKey, string $privateKey);
+    public function increaseAllowance(float $amount, BlockchainConfig $config);
 
     /**
      * @param array $args
-     * @param string $publicKey
-     * @param string $privateKey
+     * @param BlockchainConfig $config
      * @return array [string assetContract, BigInteger tokenId, string stateCommitHash]
      * @throws BlockchainException
      */
-    public function createAsset(array $args, string $publicKey, string $privateKey): array;
-
-    /**
-     * @return string
-     */
-    public function getContentAssetContractAddress(): string;
-
+    public function createAsset(array $args, BlockchainConfig $config): array;
 }

@@ -3,12 +3,9 @@
 namespace Dkg\Services\NodeService;
 
 
+use Dkg\Communication\HttpClient\HttpResponse;
 use Dkg\Communication\HttpConfig;
-use Dkg\Communication\Infrastructure\Exceptions\CommunicationException;
-use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
 use Dkg\Communication\NodeProxyInterface;
-use Dkg\Exceptions\ConfigMissingException;
-use Dkg\Services\RequestOptions;
 
 class NodeService implements NodeServiceInterface
 {

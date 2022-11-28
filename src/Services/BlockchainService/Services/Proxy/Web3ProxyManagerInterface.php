@@ -5,8 +5,7 @@ namespace Dkg\Services\BlockchainService\Services\Proxy;
 interface Web3ProxyManagerInterface
 {
     /**
-     * Returns singleton instance
-     * @return Web3ProxyManager
+     * @return Web3ProxyManagerInterface
      */
     public static function getInstance(): Web3ProxyManagerInterface;
 

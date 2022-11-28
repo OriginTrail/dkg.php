@@ -2,13 +2,12 @@
 
 namespace Dkg\Services\AssetService\Dto;
 
-use Dkg\Services\Constants;
+use Dkg\Config\Constants;
 use Dkg\Services\RequestOptions;
 
 class PublishOptions extends RequestOptions
 {
-    /** @var string|null */
-    private $visibility = Constants::VISIBILITY_PUBLIC;
+    private $publishType = Constants::PUBLISH_TYPE_ASSET;
 
     /** @var bool */
     private $localStore = false;
@@ -19,21 +18,8 @@ class PublishOptions extends RequestOptions
     /** @var float */
     private $tokenAmount = Constants::PUBLISH_DEFAULT_TOKEN_AMOUNT;
 
-    /**
-     * @return string
-     */
-    public function getVisibility(): string
-    {
-        return $this->visibility;
-    }
-
-    /**
-     * @param string $visibility 'public' | 'private'
-     */
-    public function setVisibility(string $visibility): void
-    {
-        $this->visibility = $visibility;
-    }
+    /** @var int */
+    private $hashFunctionId = Constants::PUBLISH_DEFAULT_HASH_FUNCTION_ID;
 
     /**
      * @return bool
@@ -81,5 +67,21 @@ class PublishOptions extends RequestOptions
     public function setTokenAmount(float $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getHashFunctionId(): int
+    {
+        return $this->hashFunctionId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPublishType(): string
+    {
+        return $this->publishType;
     }
 }

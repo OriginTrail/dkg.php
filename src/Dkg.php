@@ -2,7 +2,7 @@
 
 namespace Dkg;
 
-use Dkg\Communication\Infrastructure\HttpClient\HttpClient;
+use Dkg\Communication\HttpClient\HttpClient;
 use Dkg\Communication\NodeProxy;
 use Dkg\Config\DkgConfig;
 use Dkg\Services\AssetService\AssetService;

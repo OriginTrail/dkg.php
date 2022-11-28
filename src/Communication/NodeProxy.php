@@ -2,16 +2,15 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Communication\Infrastructure\Exceptions\CommunicationException;
-use Dkg\Communication\Infrastructure\Exceptions\MaximumAttemptsExceededException;
-use Dkg\Communication\Infrastructure\HttpClient\HttpClient;
-use Dkg\Communication\Infrastructure\HttpClient\HttpClientInterface;
-use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
-use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Communication\Exceptions\NodeProxyException;
+use Dkg\Communication\HttpClient\HttpClient;
+use Dkg\Communication\HttpClient\HttpClientInterface;
+use Dkg\Communication\HttpClient\HttpResponse;
+use Dkg\Config\Constants;
 use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
-use Dkg\Services\Constants;
 
 class NodeProxy implements NodeProxyInterface
 {
@@ -35,78 +34,104 @@ class NodeProxy implements NodeProxyInterface
         }
     }
 
-    public function info(?string $baseUrl = null, ?string $authToken = null): HttpResponse
+    public function info(?HttpConfig $config = null): HttpResponse
     {
-        $url = $this->getBaseUrl($baseUrl) . '/info';
-        $authToken = $authToken ?? $this->config->getAuthToken();
-        $headers = $this->prepareHeaders($authToken);
+        $url = $this->getBaseUrl($config) . '/info';
+        $headers = $this->prepareHeaders($config);
 
         return $this->client->get($url, $headers);
     }
 
-
     /**
-     * @throws MaximumAttemptsExceededException
-     * @throws ConfigMissingException
-     * @throws CommunicationException
+     * @throws ServiceMisconfigurationException
+     * @throws NodeProxyException
      * @throws InvalidPublishRequestException
      */
-    public function publish(Asset $asset, PublishOptions $options): HttpResponse
+    public function publish(Asset $asset, PublishOptions $options): OperationResult
     {
-        $url = $this->getBaseUrl($options->getBaseUrl()) . '/api/post';
+        $url = $this->getBaseUrl($options->getHttpConfig()) . '/publish';
         $body = $this->preparePublishBody($asset, $options);
-        $headers = $this->prepareHeaders($options->getAuthToken());
+        $headers = $this->prepareHeaders($options->getHttpConfig());
 
         return $this->processAsync($url, $body, $headers);
     }
 
     /**
-     * @param $url
+     * @param string $url
      * @param array $body
      * @param array $headers
-     * @return HttpResponse
-     * @throws CommunicationException
-     * @throws MaximumAttemptsExceededException
+     * @return OperationResult
+     * @throws NodeProxyException
      */
-    private function processAsync($url, array $body = [], array $headers = []): HttpResponse
+    private function processAsync(string $url, array $body = [], array $headers = []): OperationResult
     {
         $res = $this->client->post($url, $body, $headers);
 
         if (!$res->isSuccessful()) {
-            return $res;
+            throw new NodeProxyException("Ot Node returned {$res->getStatusCode()} code.", $res);
         }
 
         $counter = 0;
-        $handlerId = $res->getBodyAsObject()->handler_id;
+        $operationId = $res->getBodyAsObject()->operationId;
 
         while ($counter++ < $this->config->getMaxNumOfRetries()) {
-            $res = $this->client->get($url . "/result/$handlerId", $headers);
+            $res = $this->client->get($url . "/$operationId", $headers);
 
             if (!$res->isSuccessful() || $this->isProcessingFinished($res)) {
-                return $res;
+                $body = $res->getBodyAsObject();
+                return new OperationResult(
+                    $body->status,
+                    $body->data,
+                    $operationId
+                );
             }
 
             // usleep measures time in microseconds, retryFrequency is in ms
             usleep($this->config->getRetryFrequency() * 1000);
         }
 
-        throw new MaximumAttemptsExceededException("Exceeded {$this->config->getMaxNumOfRetries()} number of retries. Handler id: $handlerId");
+        throw new NodeProxyException("Exceeded {$this->config->getMaxNumOfRetries()} number of retries.", ['operationId' => $operationId]);
     }
 
     /**
      * Returns BaseURL.
      * Provided baseUrl overrides default baseURL.
-     * @param string|null $baseUrl
+     * @param HttpConfig|null $config
      * @return string
-     * @throws ConfigMissingException
+     * @throws ServiceMisconfigurationException
      */
-    private function getBaseUrl(?string $baseUrl): string
+    private function getBaseUrl(?HttpConfig $config): string
     {
-        if (!$baseUrl && !$this->config->getBaseUrl()) {
-            throw new ConfigMissingException('No base URL provided.');
+        if ((!$config || !$config->getBaseUrl()) && !$this->config->getBaseUrl()) {
+            throw new ServiceMisconfigurationException('No base URL provided.');
         }
 
-        return $baseUrl ?? $this->config->getBaseUrl();
+        if ($config) {
+            return $config->getBaseUrl() ?? $this->config->getBaseUrl();
+        }
+
+        return $this->config->getBaseUrl();
+    }
+
+    /**
+     * @param HttpConfig|null $config
+     * @return array
+     */
+    private function prepareHeaders(?HttpConfig $config): ?array
+    {
+        if ((!$config || !$config->getAuthToken()) && !$this->config->getAuthToken()) {
+            return [];
+        }
+
+        if ($config) {
+            $token = $config->getAuthToken() ?? $this->config->getAuthToken();
+        } else {
+            $token = $this->config->getAuthToken();
+        }
+
+        return [
+            'Authorization' => "Bearer $token"
+        ];
     }
 
     /**
@@ -144,16 +169,5 @@ class NodeProxy implements NodeProxyInterface
         }
 
         return array_merge($baseBody, $body);
-    }
-
-    private function prepareHeaders(?string $authToken): ?array
-    {
-        if ($authToken) {
-            return [
-                'Authorization' => "Bearer $authToken"
-            ];
-        }
-
-        return [];
     }
 }

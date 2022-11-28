@@ -3,10 +3,10 @@
 namespace Dkg\Services\BlockchainService\Services\Proxy;
 
 use Dkg\Exceptions\BlockchainException;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 use Dkg\Services\BlockchainService\Services\AbiManager\AbiManager;
 use Dkg\Services\BlockchainService\Services\AbiManager\Dto\AbiEvent;
 use Dkg\Services\BlockchainService\Services\Proxy\Dto\BlockchainInfo;
-use Dkg\Services\Constants;
 use phpseclib\Math\BigInteger;
 use Web3\Contract;
 use Web3\Providers\HttpProvider;
@@ -40,6 +40,7 @@ class Web3Proxy implements Web3ProxyInterface
     private function __construct(BlockchainInfo $blockchainInfo)
     {
         $this->blockchainInfo = $blockchainInfo;
+
         $this->web3 = new Web3(new HttpProvider(new HttpRequestManager($blockchainInfo->getRpc())));
         $this->abiManager = AbiManager::getInstance();
         $this->initContracts($blockchainInfo->getHubContract());
@@ -50,24 +51,22 @@ class Web3Proxy implements Web3ProxyInterface
         return new Web3Proxy($blockchainInfo);
     }
 
-    public function increaseAllowance(float $amount, string $publicKey, string $privateKey)
+    public function increaseAllowance(float $amount, BlockchainConfig $config)
     {
         $this->executeContractFunction(
             $this->tokenContract,
-            $publicKey,
-            $privateKey,
+            $config,
             'increaseAllowance',
             $this->serviceAgreementStorageContract->getToAddress(),
             $amount,
         );
     }
 
-    public function createAsset(array $args, string $publicKey, string $privateKey): array
+    public function createAsset(array $args, BlockchainConfig $config): array
     {
         $receipt = $this->executeContractFunction(
             $this->contentAssetContract,
-            $publicKey,
-            $privateKey,
+            $config,
             'createAsset',
             ...$args
         );
@@ -158,20 +157,19 @@ class Web3Proxy implements Web3ProxyInterface
 
     /**
      * @param Contract $contract
-     * @param string $publicKey
-     * @param string $privateKey
+     * @param BlockchainConfig $config
      * @param ...$args
      * @return object
      * @throws BlockchainException
      */
-    private function executeContractFunction(Contract $contract, string $publicKey, string $privateKey, ...$args): object
+    private function executeContractFunction(Contract $contract, BlockchainConfig $config, ...$args): object
     {
-        $from = $publicKey;
+        $from = $config->getPublicKey();
         $to = $contract->getToAddress();
         $chainId = $this->blockchainInfo->getChainId();
         $gasPrice = $this->getGasPrice($contract);
         $rawTransactionData = '0x' . $contract->getData(...$args);
-        $transactionCount = $this->getTransactionCount($contract, $publicKey);
+        $transactionCount = $this->getTransactionCount($contract, $config->getPublicKey());
 
         $txParams = [
             'from' => $from,
@@ -185,7 +183,7 @@ class Web3Proxy implements Web3ProxyInterface
         $gasLimit = $this->getGasLimit($contract, $txParams);
         $txParams['gasLimit'] = '0x' . dechex((int)$gasLimit->toString() * 10);
 
-        return $this->sendTransaction($contract, $txParams, $privateKey);
+        return $this->sendTransaction($contract, $txParams, $config);
     }
 
     /**
@@ -260,14 +258,14 @@ class Web3Proxy implements Web3ProxyInterface
     /**
      * @param Contract $contract
      * @param array $txParams
-     * @param string $privateKey
+     * @param BlockchainConfig $config
      * @return object
      * @throws BlockchainException
      */
-    private function sendTransaction(Contract $contract, array $txParams, string $privateKey): object
+    private function sendTransaction(Contract $contract, array $txParams, BlockchainConfig $config): object
     {
         $tx = new Transaction($txParams);
-        $signedTx = '0x' . $tx->sign($privateKey);
+        $signedTx = '0x' . $tx->sign($config->getPrivateKey());
 
         $txHash = null;
 
@@ -278,18 +276,21 @@ class Web3Proxy implements Web3ProxyInterface
             $txHash = $txResult;
         });
 
-        return $this->pollForTxReceipt($contract, $txHash);
+        return $this->pollForTxReceipt($contract, $txHash, $config);
     }
 
     /**
      * @param Contract $contract
      * @param string $txHash
+     * @param BlockchainConfig $config
      * @return object
      * @throws BlockchainException
      */
-    public function pollForTxReceipt(Contract $contract, string $txHash): object
+    public function pollForTxReceipt(Contract $contract, string $txHash, BlockchainConfig $config): object
     {
-        for ($i = 0; $i <= Constants::BLOCKCHAIN_DEFAULT_TIMEOUT_TIME_IN_SEC; $i++) {
+        $txReceipt = null;
+
+        for ($i = 0; $i <= $config->getNumOfRetries(); $i++) {
             $contract->getEth()
                 ->getTransactionReceipt($txHash, function ($err, $txReceiptResult) use (&$txReceipt) {
                     if ($err) {
@@ -302,8 +303,10 @@ class Web3Proxy implements Web3ProxyInterface
                 break;
             }
 
-            sleep(1);
+            // usleep accept microseconds while pollFrequency is in milliseconds
+            usleep($config->getPollFrequency() * 1000);
         }
+
         return $txReceipt;
     }
 
@@ -338,10 +341,5 @@ class Web3Proxy implements Web3ProxyInterface
         }
 
         return $decoded;
-    }
-
-    public function getContentAssetContractAddress(): string
-    {
-        return $this->contentAssetContract->getToAddress();
     }
 }

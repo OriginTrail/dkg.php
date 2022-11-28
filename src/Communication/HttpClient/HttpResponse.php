@@ -1,11 +1,14 @@
 <?php
 
-namespace Dkg\Communication\Infrastructure\HttpClient;
+namespace Dkg\Communication\HttpClient;
 
 class HttpResponse
 {
+    /** @var string */
     private $body;
+    /** @var int */
     private $statusCode;
+    /** @var array */
     private $headers;
 
     /**

@@ -2,8 +2,11 @@
 
 namespace Dkg\Services\AssetService;
 
+use Dkg\Communication\Exceptions\NodeProxyException;
 use Dkg\Communication\NodeProxyInterface;
+use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssertionTools\AssertionTools;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
@@ -30,9 +33,11 @@ class AssetService implements AssetServiceInterface
 
     /**
      * @throws InvalidPublishRequestException
-     * @throws Exception
+     * @throws NodeProxyException
+     * @throws BlockchainException
+     * @throws ServiceMisconfigurationException
      */
-    public function create(array $content, ?PublishOptions $options, $stepHooks = [])
+    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset
     {
         if (!isset($options)) {
             // set default options
@@ -47,19 +52,30 @@ class AssetService implements AssetServiceInterface
         }
 
         $asset = new Asset();
+        $asset->setAssertion($assertion);
         $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
         $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
         $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
         $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
+
+        $asset = $this->blockchainService->createAsset($asset, $options);
+
         $asset->setUai($this->createUai(
             $asset->getBlockchain(),
             $asset->getContract(),
             $asset->getTokenId()
         ));
 
-        $asset = $this->blockchainService->createAsset($asset, $options);
+        $nodeResponse = $this->nodeProxy->publish($asset, $options);
 
-        $this->nodeProxy->publish($asset, $options);
+        if ($nodeResponse->getStatus() === 'FAILED') {
+            throw new NodeProxyException(
+                "Publish operation failed. OperationId {$nodeResponse->getOperationId()}",
+                $nodeResponse
+            );
+        }
+
+        return $asset;
     }
 
     public function get()

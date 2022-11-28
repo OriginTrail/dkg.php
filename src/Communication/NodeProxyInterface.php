@@ -2,22 +2,25 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Communication\Infrastructure\Exceptions\CommunicationException;
-use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
-use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Communication\Exceptions\NodeProxyException;
+use Dkg\Communication\HttpClient\HttpResponse;
+use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 
 interface NodeProxyInterface
 {
     /**
-     * @param string|null $baseUrl
-     * @param string|null $authToken
+     * @param HttpConfig|null $config
      * @return HttpResponse
-     * @throws ConfigMissingException
-     * @throws CommunicationException
      */
-    public function info(?string $baseUrl, ?string $authToken): HttpResponse;
+    public function info(?HttpConfig $config): HttpResponse;
 
-    public function publish(Asset $asset, PublishOptions $options);
+    /**
+     * @param Asset $asset
+     * @param PublishOptions $options
+     * @return OperationResult
+     */
+    public function publish(Asset $asset, PublishOptions $options): OperationResult;
 }

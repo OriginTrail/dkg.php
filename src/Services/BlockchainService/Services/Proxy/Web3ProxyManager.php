@@ -2,6 +2,7 @@
 
 namespace Dkg\Services\BlockchainService\Services\Proxy;
 
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 use Dkg\Services\BlockchainService\Services\Proxy\Dto\BlockchainInfo;
 use InvalidArgumentException;
 
@@ -10,11 +11,14 @@ class Web3ProxyManager implements Web3ProxyManagerInterface
     /** @var BlockchainInfo[] */
     private $infoMap = [];
 
-    /** @var Web3ProxyManagerInterface */
-    private static $instance;
+    /** @var BlockchainConfig */
+    private $defaultConfig;
 
     /** @var Web3ProxyInterface[] */
     private $proxyMap = [];
+
+    /** @var Web3ProxyManagerInterface */
+    private static $instance;
 
     private function __construct()
     {

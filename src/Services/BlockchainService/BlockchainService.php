@@ -2,7 +2,7 @@
 
 namespace Dkg\Services\BlockchainService;
 
-use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
@@ -12,14 +12,14 @@ use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManagerInterface;
 class BlockchainService implements BlockchainServiceInterface
 {
     /** @var BlockchainConfig|null */
-    private $config;
+    private $baseConfig;
 
     /** @var Web3ProxyManagerInterface */
     private $web3ProxyManager;
 
     public function __construct(Web3ProxyManagerInterface $web3ProxyManager, ?BlockchainConfig $config)
     {
-        $this->config = $config;
+        $this->baseConfig = $config;
         $this->web3ProxyManager = $web3ProxyManager;
     }
 
@@ -29,7 +29,7 @@ class BlockchainService implements BlockchainServiceInterface
         $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($options->getTokenAmount(), $config->getPublicKey(), $config->getPrivateKey());
+        $proxy->increaseAllowance($options->getTokenAmount(), $config);
 
         $createAssetArgs = [
             $asset->getAssertionId(),
@@ -40,8 +40,7 @@ class BlockchainService implements BlockchainServiceInterface
             $options->getTokenAmount()
         ];
 
-        [$assetContract, $tokenId] = $proxy->createAsset($createAssetArgs, $config->getPublicKey(), $config->getPrivateKey());
-        $contractAddress = $proxy->getContentAssetContractAddress();
+        [$contractAddress, $tokenId] = $proxy->createAsset($createAssetArgs, $config);
 
         $asset->setBlockchain($blockchainName);
         $asset->setContract($contractAddress);
@@ -51,20 +50,22 @@ class BlockchainService implements BlockchainServiceInterface
     }
 
     /**
-     * @throws ConfigMissingException
+     * @throws ServiceMisconfigurationException
      */
     private function getMergedConfig(?BlockchainConfig $config): BlockchainConfig
     {
         $mergedConfig = new BlockchainConfig();
 
-        if (!$config && !$this->config) {
-            throw new ConfigMissingException("No blockchain is provided to BlockchainService.");
+        if (!$config && !$this->baseConfig) {
+            throw new ServiceMisconfigurationException("No blockchain is provided to BlockchainService.");
         }
 
-        if ($this->config) {
-            $mergedConfig->setBlockchainName($this->config->getBlockchainName());
-            $mergedConfig->setPublicKey($this->config->getPublicKey());
-            $mergedConfig->setPrivateKey($this->config->getPrivateKey());
+        if ($this->baseConfig) {
+            $mergedConfig->setBlockchainName($this->baseConfig->getBlockchainName());
+            $mergedConfig->setPublicKey($this->baseConfig->getPublicKey());
+            $mergedConfig->setPrivateKey($this->baseConfig->getPrivateKey());
+            $mergedConfig->setNumOfRetries($this->baseConfig->getNumOfRetries());
+            $mergedConfig->setPollFrequency($this->baseConfig->getPollFrequency());
         }
 
         if ($config) {
@@ -72,13 +73,13 @@ class BlockchainService implements BlockchainServiceInterface
                 $mergedConfig->setBlockchainName($config->getBlockchainName());
             }
 
-            if ($config->getPublicKey()) {
+            if ($config->getPublicKey() && $config->getPrivateKey()) {
                 $mergedConfig->setPublicKey($config->getPublicKey());
-            }
-
-            if ($config->getPrivateKey()) {
                 $mergedConfig->setPrivateKey($config->getPrivateKey());
             }
+
+            $mergedConfig->setNumOfRetries($config->getNumOfRetries());
+            $mergedConfig->setPollFrequency($config->getPollFrequency());
         }
 
         return $mergedConfig;

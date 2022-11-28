@@ -3,7 +3,7 @@
 namespace Dkg\Services\BlockchainService;
 
 use Dkg\Exceptions\BlockchainException;
-use Dkg\Exceptions\ConfigMissingException;
+use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 
@@ -15,7 +15,7 @@ interface BlockchainServiceInterface
      * @param PublishOptions $options
      * @return Asset asset with enhanced with blockchainName, contractAddress and $tokenId
      * @throws BlockchainException
-     * @throws ConfigMissingException
+     * @throws ServiceMisconfigurationException
      */
     public function createAsset(Asset $asset, PublishOptions $options): Asset;
 }

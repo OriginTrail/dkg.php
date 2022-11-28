@@ -2,7 +2,7 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Services\Constants;
+use Dkg\Config\Constants;
 
 class HttpConfig
 {
@@ -10,7 +10,7 @@ class HttpConfig
     private $maxNumOfRetries = Constants::HTTP_DEFAULT_MAX_NUM_OF_RETRIES;
 
     /** @var int */
-    private $retryFrequency = Constants::HTTP_DEFAULT_FREQUENCY_IN_MS;
+    private $retryFrequency = Constants::HTTP_DEFAULT_POLL_FREQUENCY_IN_MS;
 
     /** @var string|null */
     private $baseUrl;

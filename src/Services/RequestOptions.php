@@ -2,65 +2,31 @@
 
 namespace Dkg\Services;
 
+use Dkg\Communication\HttpConfig;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 
 class RequestOptions
 {
-    protected $maxNumOfRetries = Constants::HTTP_DEFAULT_MAX_NUM_OF_RETRIES;
-    protected $retryFrequency = Constants::HTTP_DEFAULT_FREQUENCY_IN_SEC;
-
-    /** @var string|null */
-    protected $url;
+    /** @var HttpConfig|null */
+    protected $httpConfig;
 
     /** @var BlockchainConfig|null */
     protected $blockchainConfig;
 
     /**
-     * @return int
+     * @return HttpConfig|null
      */
-    public function getMaxNumOfRetries(): int
+    public function getHttpConfig(): ?HttpConfig
     {
-        return $this->maxNumOfRetries;
+        return $this->httpConfig;
     }
 
     /**
-     * @param int $maxNumOfRetries
+     * @param HttpConfig|null $httpConfig
      */
-    public function setMaxNumOfRetries(int $maxNumOfRetries): void
+    public function setHttpConfig(?HttpConfig $httpConfig): void
     {
-        $this->maxNumOfRetries = $maxNumOfRetries;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRetryFrequency(): int
-    {
-        return $this->retryFrequency;
-    }
-
-    /**
-     * @param int $retryFrequency
-     */
-    public function setRetryFrequency(int $retryFrequency): void
-    {
-        $this->retryFrequency = $retryFrequency;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getUrl(): ?string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string|null $url
-     */
-    public function setUrl(?string $url): void
-    {
-        $this->url = $url;
+        $this->httpConfig = $httpConfig;
     }
 
     /**

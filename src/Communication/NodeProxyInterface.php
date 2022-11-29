@@ -2,11 +2,9 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Communication\Exceptions\NodeProxyException;
 use Dkg\Communication\HttpClient\HttpResponse;
-use Dkg\Exceptions\InvalidPublishRequestException;
-use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
+use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 
 interface NodeProxyInterface
@@ -23,4 +21,11 @@ interface NodeProxyInterface
      * @return OperationResult
      */
     public function publish(Asset $asset, PublishOptions $options): OperationResult;
+
+    /**
+     * @param string $uai
+     * @param GetOptions $options
+     * @return OperationResult
+     */
+    public function get(string $uai, GetOptions $options): OperationResult;
 }

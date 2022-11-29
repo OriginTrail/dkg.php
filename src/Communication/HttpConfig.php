@@ -2,7 +2,7 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Config\Constants;
+use Dkg\Services\Constants;
 
 class HttpConfig
 {

@@ -82,6 +82,17 @@ class Web3Proxy implements Web3ProxyInterface
         return $decoded;
     }
 
+    public function getLatestAssertionId(int $tokenId): string
+    {
+        $response = $this->callContractFunction($this->contentAssetContract, 'getAssertionsLength', $tokenId);
+        $length = $response[0];
+        $length = (int) $length->toString();
+
+        [$assertion] = $this->callContractFunction($this->contentAssetContract, 'getAssertionByIndex', $tokenId, $length - 1);
+
+        return $assertion;
+    }
+
     /**
      * @param string $hubContractAddress
      * @return void
@@ -127,16 +138,15 @@ class Web3Proxy implements Web3ProxyInterface
     private function getContractAddress(string $contractName, string $fn = 'getContractAddress'): string
     {
         $res = $this->callContractFunction($this->hubContract, $fn, $contractName);
-        $res = (array)$res;
         return $res[0];
     }
 
     /**
      * @param Contract $contract
      * @param ...$arguments
-     * @return object
+     * @return array
      */
-    private function callContractFunction(Contract $contract, ...$arguments): object
+    private function callContractFunction(Contract $contract, ...$arguments): array
     {
         $cb = function ($err, $result) use (&$response) {
             if ($err) {
@@ -144,7 +154,6 @@ class Web3Proxy implements Web3ProxyInterface
             }
 
             $response = $result;
-
         };
 
         $response = null;
@@ -152,7 +161,7 @@ class Web3Proxy implements Web3ProxyInterface
 
         $contract->call(...$args);
 
-        return (object)$response;
+        return $response;
     }
 
     /**

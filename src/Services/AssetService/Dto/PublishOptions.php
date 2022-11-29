@@ -3,8 +3,8 @@
 namespace Dkg\Services\AssetService\Dto;
 
 use Dkg\Communication\HttpConfig;
-use Dkg\Config\Constants;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
+use Dkg\Services\Constants;
 use Dkg\Services\RequestOptions;
 
 class PublishOptions extends RequestOptions
@@ -127,7 +127,7 @@ class PublishOptions extends RequestOptions
         $options->setLocalStore(false);
         $options->setEpochsNum(Constants::PUBLISH_DEFAULT_EPOCH_NUM);
         $options->setTokenAmount(Constants::PUBLISH_DEFAULT_TOKEN_AMOUNT);
-        $options->setHashFunctionId(Constants::PUBLISH_DEFAULT_HASH_FUNCTION_ID);
+        $options->setHashFunctionId(Constants::DEFAULT_HASH_FUNCTION_ID);
         $options->setBlockchainConfig(new BlockchainConfig());
         $options->setHttpConfig(new HttpConfig());
 

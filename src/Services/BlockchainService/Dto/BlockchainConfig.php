@@ -2,7 +2,7 @@
 
 namespace Dkg\Services\BlockchainService\Dto;
 
-use Dkg\Config\Constants;
+use Dkg\Services\Constants;
 
 /**
  * This class is used as an argument for blockchain initialization.

@@ -6,11 +6,12 @@ use Dkg\Communication\Exceptions\NodeProxyException;
 use Dkg\Communication\HttpClient\HttpClient;
 use Dkg\Communication\HttpClient\HttpClientInterface;
 use Dkg\Communication\HttpClient\HttpResponse;
-use Dkg\Config\Constants;
-use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Exceptions\InvalidRequestException;
 use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
+use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\PublishOptions;
+use Dkg\Services\Constants;
 
 class NodeProxy implements NodeProxyInterface
 {
@@ -44,7 +45,7 @@ class NodeProxy implements NodeProxyInterface
     /**
      * @throws ServiceMisconfigurationException
      * @throws NodeProxyException
-     * @throws InvalidPublishRequestException
+     * @throws InvalidRequestException
      */
     public function publish(Asset $asset, PublishOptions $options): OperationResult
     {
@@ -53,6 +54,55 @@ class NodeProxy implements NodeProxyInterface
         $headers = $this->prepareHeaders($options->getHttpConfig());
 
         return $this->processAsync($url, $body, $headers);
+    }
+
+    /**
+     * @throws InvalidRequestException
+     */
+    private function preparePublishBody(Asset $asset, PublishOptions $options): array
+    {
+        $baseBody = [
+            'publishType' => $options->getPublishType(),
+            'assertionId' => $asset->getAssertionId(),
+            'assertion' => $asset->getAssertion()
+        ];
+
+        switch ($options->getPublishType()) {
+            case Constants::PUBLISH_TYPE_ASSET:
+                $body = [
+                    'blockchain' => $asset->getBlockchain(),
+                    'contract' => $asset->getContract(),
+                    'tokenId' => $asset->getTokenId(),
+                    'hashFunctionId' => $options->getHashFunctionId(),
+                    'localStore' => $options->isLocalStore()
+                ];
+                break;
+            default:
+                throw new InvalidRequestException("Unsupported publish type '{$options->getPublishType()}'.");
+        }
+
+        return array_merge($baseBody, $body);
+    }
+
+    /**
+     * @throws ServiceMisconfigurationException
+     * @throws NodeProxyException
+     */
+    public function get(string $uai, GetOptions $options): OperationResult
+    {
+        $url = $this->getBaseUrl($options->getHttpConfig()) . '/get';
+        $body = $this->prepareGetBody($uai, $options);
+        $headers = $this->prepareHeaders($options->getHttpConfig());
+
+        return $this->processAsync($url, $body, $headers);
+    }
+
+    private function prepareGetBody(string $uai, GetOptions $options): array
+    {
+        return [
+            'id' => $uai,
+            'hashFunctionId' => $options->getHashFunctionId()
+        ];
     }
 
     /**
@@ -143,34 +193,6 @@ class NodeProxy implements NodeProxyInterface
     }
 
     /**
-     * @throws InvalidPublishRequestException
-     */
-    private function preparePublishBody(Asset $asset, PublishOptions $options): array
-    {
-        $baseBody = [
-            'publishType' => $options->getPublishType(),
-            'assertionId' => $asset->getAssertionId(),
-            'assertion' => $asset->getAssertion()
-        ];
-
-        switch ($options->getPublishType()) {
-            case Constants::PUBLISH_TYPE_ASSET:
-                $body = [
-                    'blockchain' => $asset->getBlockchain(),
-                    'contract' => $asset->getContract(),
-                    'tokenId' => $asset->getTokenId(),
-                    'hashFunctionId' => $options->getHashFunctionId(),
-                    'localStore' => $options->isLocalStore()
-                ];
-                break;
-            default:
-                throw new InvalidPublishRequestException("Unsupported publish type '{$options->getPublishType()}'.");
-        }
-
-        return array_merge($baseBody, $body);
-    }
-
-    /**
      * @throws ServiceMisconfigurationException
      */
     private function mergeConfig(?HttpConfig $config): HttpConfig
@@ -213,3 +235,7 @@ class NodeProxy implements NodeProxyInterface
         return $mergedConfig;
     }
 }
+
+
+
+

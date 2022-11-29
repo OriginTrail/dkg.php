@@ -72,4 +72,12 @@ class OperationResult
     {
         $this->operationId = $operationId;
     }
+
+    /**
+     * @return bool
+     */
+    public function isSuccess(): bool
+    {
+        return $this->status === 'COMPLETED';
+    }
 }

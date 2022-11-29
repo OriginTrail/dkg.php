@@ -6,6 +6,7 @@ use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 
 interface BlockchainServiceInterface
 {
@@ -18,4 +19,11 @@ interface BlockchainServiceInterface
      * @throws ServiceMisconfigurationException
      */
     public function createAsset(Asset $asset, PublishOptions $options): Asset;
+
+    /**
+     * @param int $tokenId
+     * @param BlockchainConfig $config
+     * @return mixed
+     */
+    public function getLatestAssertionId(int $tokenId, BlockchainConfig $config);
 }

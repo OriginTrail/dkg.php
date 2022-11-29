@@ -52,6 +52,18 @@ class BlockchainService implements BlockchainServiceInterface
     /**
      * @throws ServiceMisconfigurationException
      */
+    public function getLatestAssertionId(int $tokenId, BlockchainConfig $config): string
+    {
+        $config = $this->getMergedConfig($config);
+        $blockchainName = $config->getBlockchainName();
+        $proxy = $this->web3ProxyManager->getProxy($blockchainName);
+
+        return $proxy->getLatestAssertionId($tokenId);
+    }
+
+    /**
+     * @throws ServiceMisconfigurationException
+     */
     private function getMergedConfig(?BlockchainConfig $config): BlockchainConfig
     {
         $mergedConfig = new BlockchainConfig();

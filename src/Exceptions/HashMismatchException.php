@@ -4,7 +4,7 @@ namespace Dkg\Exceptions;
 
 use Exception;
 
-class InvalidPublishRequestException extends Exception
+class HashMismatchException extends Exception
 {
 
 }

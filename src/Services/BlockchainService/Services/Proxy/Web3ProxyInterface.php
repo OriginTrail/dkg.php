@@ -31,4 +31,6 @@ interface Web3ProxyInterface
      * @throws BlockchainException
      */
     public function createAsset(array $args, BlockchainConfig $config): array;
+
+    public function getLatestAssertionId(int $tokenId): string;
 }

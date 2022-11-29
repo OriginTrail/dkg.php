@@ -5,17 +5,24 @@ namespace Dkg\Services\AssetService;
 use Dkg\Communication\Exceptions\NodeProxyException;
 use Dkg\Communication\NodeProxyInterface;
 use Dkg\Exceptions\BlockchainException;
-use Dkg\Exceptions\InvalidPublishRequestException;
+use Dkg\Exceptions\HashMismatchException;
+use Dkg\Exceptions\InvalidRequestException;
 use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssertionTools\AssertionTools;
 use Dkg\Services\AssetService\Dto\Asset;
+use Dkg\Services\AssetService\Dto\GetOptions;
+use Dkg\Services\AssetService\Dto\GetResult;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
+use Dkg\Services\Constants;
+use Dkg\Services\JsonLD;
 use Exception;
+use InvalidArgumentException;
 
 class AssetService implements AssetServiceInterface
 {
+    private const UAI_REGEX = '/did:([a-z]+):([a-z0-9]+)\/(\d+)/';
     private const MAX_CONTENT_SIZE_IN_MB = 2.5;
 
     /** @var NodeProxyInterface */
@@ -32,7 +39,7 @@ class AssetService implements AssetServiceInterface
     }
 
     /**
-     * @throws InvalidPublishRequestException
+     * @throws InvalidRequestException
      * @throws NodeProxyException
      * @throws BlockchainException
      * @throws ServiceMisconfigurationException
@@ -48,7 +55,7 @@ class AssetService implements AssetServiceInterface
             $this->validatePublishRequest($content, $options);
             $assertion = AssertionTools::formatAssertion($content);
         } catch (Exception $e) {
-            throw new InvalidPublishRequestException($e->getMessage());
+            throw new InvalidRequestException("Invalid publish request. {$e->getMessage()}");
         }
 
         $asset = new Asset();
@@ -68,7 +75,7 @@ class AssetService implements AssetServiceInterface
 
         $nodeResponse = $this->nodeProxy->publish($asset, $options);
 
-        if ($nodeResponse->getStatus() === 'FAILED') {
+        if (!$nodeResponse->isSuccess()) {
             throw new NodeProxyException(
                 "Publish operation failed. OperationId {$nodeResponse->getOperationId()}",
                 $nodeResponse
@@ -78,9 +85,44 @@ class AssetService implements AssetServiceInterface
         return $asset;
     }
 
-    public function get()
+    /**
+     * @throws HashMismatchException
+     */
+    public function get(string $uai, ?GetOptions $options = null): GetResult
     {
-        // TODO: Implement get() method.
+        if (!isset($options)) {
+            $options = GetOptions::default();
+        }
+
+        [, , $tokenId] = $this->getUaiElements($uai);
+
+        $assertionId = $this->blockchainService->getLatestAssertionId($tokenId, $options->getBlockchainConfig());
+
+        $nodeResponse = $this->nodeProxy->get($uai, $options);
+
+        if (!$nodeResponse->isSuccess()) {
+            throw new InvalidArgumentException("UAI '$uai' doesn't exist.");
+        }
+
+        $assertion = $nodeResponse->getData()->assertion;
+
+        if ($options->getValidate()) {
+            $rootHash = AssertionTools::calculateRoot($assertion);
+            if ($assertionId !== $rootHash) {
+                throw new HashMismatchException("Expected hash $assertionId but got $rootHash");
+            }
+        }
+
+        if ($options->getOutputFormat() !== Constants::JSONLD_FORMAT_N_QUADS) {
+            $assertion = JsonLD::fromRdf($assertion);
+        }
+
+        $result = new GetResult();
+        $result->setAssertion($assertion);
+        $result->setAssertionId($assertionId);
+        $result->setNodeResponse($nodeResponse);
+
+        return $result;
     }
 
     public function update()
@@ -99,14 +141,14 @@ class AssetService implements AssetServiceInterface
     }
 
     /**
-     * @throws InvalidPublishRequestException
+     * @throws InvalidRequestException
      */
     private function validatePublishRequest(array $content, ?PublishOptions $options)
     {
         $this->validateDatasetSize($content);
 
         if (!$options->validate()) {
-            throw new InvalidPublishRequestException('Some of publish options fields are missing.');
+            throw new InvalidRequestException('Some of publish options fields are missing.');
         }
 
         if ($options->getBlockchainConfig()) {
@@ -115,29 +157,47 @@ class AssetService implements AssetServiceInterface
     }
 
     /**
-     * @throws InvalidPublishRequestException
+     * @throws InvalidRequestException
      */
     private function validateDatasetSize(array $content)
     {
         $contentSize = AssertionTools::getSizeInMb($content);
 
         if ($contentSize > self::MAX_CONTENT_SIZE_IN_MB) {
-            throw new InvalidPublishRequestException("Maximum dataset size exceeded. $contentSize / " . self::MAX_CONTENT_SIZE_IN_MB . "MB");
+            throw new InvalidRequestException("Maximum dataset size exceeded. $contentSize / " . self::MAX_CONTENT_SIZE_IN_MB . "MB");
         }
     }
 
     /**
-     * @throws InvalidPublishRequestException
+     * @throws InvalidRequestException
      */
     private function validateBlockchain($blockchain)
     {
         if (!BlockchainService::isBlockchainSupported($blockchain)) {
-            throw new InvalidPublishRequestException("'$blockchain' options blockchain parameter is not supported.");
+            throw new InvalidRequestException("'$blockchain' options blockchain parameter is not supported.");
         }
     }
 
     private function createUai(?string $blockchain, ?string $contract, ?int $tokenId): string
     {
         return "did:$blockchain:$contract/$tokenId";
+    }
+
+    /**
+     * @param string $uai
+     * @return array|null [blockchain, contractId, tokenId]
+     */
+    private function getUaiElements(string $uai): ?array
+    {
+        $uai = strtolower($uai);
+        $elements = [];
+
+        preg_match(self::UAI_REGEX, $uai, $elements);
+
+        if (!count($elements)) {
+            return null;
+        }
+
+        return [$elements[1], $elements[2], (int)$elements[3]];
     }
 }

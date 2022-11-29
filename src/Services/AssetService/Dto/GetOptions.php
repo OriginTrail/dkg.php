@@ -77,7 +77,7 @@ class GetOptions extends RequestOptions
         $options = new GetOptions();
         $options->setValidate(Constants::GET_DEFAULT_VALIDATE);
         $options->setHashFunctionId(Constants::DEFAULT_HASH_FUNCTION_ID);
-        $options->setOutputFormat(Constants::JSONLD_FORMAT_N_QUADS);
+        $options->setOutputFormat(Constants::JSONLD_FORMAT_NQUADS);
 
         return $options;
     }

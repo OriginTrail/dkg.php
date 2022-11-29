@@ -18,7 +18,6 @@ class Constants
 
     public const GET_DEFAULT_VALIDATE = true;
 
-    public const JSONLD_FORMAT_N_QUADS = 'application/nquads';
+    public const JSONLD_FORMAT_NQUADS = 'nquads';
     public const JSONLD_FORMAT_JSONLD = 'jsonld';
-    public const JSONLD_ALGORITHM_URDNA2015 = 'URDNA2015';
 }

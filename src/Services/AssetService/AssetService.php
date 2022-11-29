@@ -113,7 +113,7 @@ class AssetService implements AssetServiceInterface
             }
         }
 
-        if ($options->getOutputFormat() !== Constants::JSONLD_FORMAT_N_QUADS) {
+        if ($options->getOutputFormat() === Constants::JSONLD_FORMAT_NQUADS) {
             $assertion = JsonLD::fromRdf($assertion);
         }
 

@@ -27,7 +27,7 @@ $dataset = [
     "spouse" => "http://dbpedia.org/resource/Cynthia_Lennon"
 ];
 
-echo "--- PUBLISH ---\n";
+echo "\n--- PUBLISH ---\n";
 
 $publishOptions = PublishOptions::default();
 $publishOptions->setTokenAmount(7);
@@ -43,3 +43,13 @@ echo json_encode([
     'assertion' => json_encode($asset->getAssertion())
 ]);
 
+echo "\n\n----- GET -----\n";
+
+$response = $dkg->asset()->get($asset->getUai());
+echo "Get succeeded. \n\n";
+
+echo json_encode([
+    'assertion' => $response->getAssertion(),
+    'assertionId' => $response->getAssertionId(),
+    'nodeResponse' => $response->getNodeResponse()
+]);

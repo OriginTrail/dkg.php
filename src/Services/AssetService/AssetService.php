@@ -16,7 +16,7 @@ use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\AssetService\Dto\PublishResult;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 use Dkg\Services\JsonLD;
 use Exception;
 use InvalidArgumentException;
@@ -32,7 +32,6 @@ class AssetService implements AssetServiceInterface
     /** @var BlockchainServiceInterface */
     private $blockchainService;
 
-    // fixme change parameter type to interface
     public function __construct(NodeProxyInterface $nodeProxy, BlockchainServiceInterface $blockchainService)
     {
         $this->nodeProxy = $nodeProxy;
@@ -122,7 +121,7 @@ class AssetService implements AssetServiceInterface
             }
         }
 
-        if ($options->getOutputFormat() === Constants::JSONLD_FORMAT_NQUADS) {
+        if ($options->getOutputFormat() === Params::JSONLD_FORMAT_NQUADS) {
             $assertion = JsonLD::fromRdf($assertion);
         }
 

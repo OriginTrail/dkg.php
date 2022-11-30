@@ -2,7 +2,7 @@
 
 namespace Dkg\Services\BlockchainService\Dto;
 
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 
 /**
  * This class is used as an argument for blockchain initialization.
@@ -123,8 +123,8 @@ class BlockchainConfig
     public static function default(): BlockchainConfig
     {
         $config = new BlockchainConfig();
-        $config->setNumOfRetries(Constants::BLOCKCHAIN_DEFAULT_NUM_OF_RETRIES);
-        $config->setPollFrequency(Constants::BLOCKCHAIN_DEFAULT_POLL_FREQUENCY_IN_MS);
+        $config->setNumOfRetries(Params::BLOCKCHAIN_DEFAULT_NUM_OF_RETRIES);
+        $config->setPollFrequency(Params::BLOCKCHAIN_DEFAULT_POLL_FREQUENCY_IN_MS);
 
         return $config;
     }

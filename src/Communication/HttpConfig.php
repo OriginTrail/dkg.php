@@ -2,7 +2,7 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 
 class HttpConfig
 {
@@ -97,8 +97,8 @@ class HttpConfig
     public static function default(): HttpConfig
     {
         $config = new HttpConfig();
-        $config->setMaxNumOfRetries(Constants::HTTP_DEFAULT_MAX_NUM_OF_RETRIES);
-        $config->setRetryFrequency(Constants::HTTP_DEFAULT_POLL_FREQUENCY_IN_MS);
+        $config->setMaxNumOfRetries(Params::HTTP_DEFAULT_MAX_NUM_OF_RETRIES);
+        $config->setRetryFrequency(Params::HTTP_DEFAULT_POLL_FREQUENCY_IN_MS);
 
         return $config;
     }

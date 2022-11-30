@@ -1,6 +1,6 @@
 <?php
 
-namespace Dkg\Communication\Infrastructure\HttpClient;
+namespace Dkg\Communication\HttpClient;
 
 class HttpMethods
 {

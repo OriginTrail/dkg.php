@@ -3,11 +3,11 @@
 namespace Dkg\Services\NodeService;
 
 
-use Dkg\Communication\Infrastructure\HttpClient\HttpMethods;
-use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
+use Dkg\Communication\HttpClient\HttpResponse;
+use Dkg\Communication\HttpConfig;
 use Dkg\Communication\NodeProxyInterface;
 
-class NodeService
+class NodeService implements NodeServiceInterface
 {
     /** @var NodeProxyInterface */
     private $nodeProxy;
@@ -17,9 +17,8 @@ class NodeService
         $this->nodeProxy = $nodeProxy;
     }
 
-
-    public function getInfo(): HttpResponse
+    public function getInfo(?HttpConfig $config = null): HttpResponse
     {
-        return $this->nodeProxy->sendRequest(HttpMethods::GET_METHOD, '/info');
+        return $this->nodeProxy->info($config);
     }
 }

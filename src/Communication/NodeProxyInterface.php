@@ -2,29 +2,32 @@
 
 namespace Dkg\Communication;
 
-use Dkg\Communication\Infrastructure\Exceptions\CommunicationException;
-use Dkg\Communication\Infrastructure\Exceptions\MaximumAttemptsExceededException;
-use Dkg\Communication\Infrastructure\HttpClient\HttpResponse;
+use Dkg\Communication\HttpClient\HttpResponse;
+use Dkg\Services\AssetService\Dto\Asset;
+use Dkg\Services\AssetService\Dto\GetOptions;
+use Dkg\Services\AssetService\Dto\PublishOptions;
 
 interface NodeProxyInterface
 {
     /**
-     * @param $url
-     * @param array $body
-     * @param array $headers
+     * @param HttpConfig|null $config
      * @return HttpResponse
-     * @throws MaximumAttemptsExceededException Node didn't respond in defined number of tries
-     * @throws CommunicationException
      */
-    public function processAsync($url, array $body = [], array $headers = []): HttpResponse;
+    public function info(?HttpConfig $config): HttpResponse;
 
     /**
-     * @param $method
-     * @param $url
-     * @param array $headers
-     * @param array $body
-     * @return HttpResponse
-     * @throws CommunicationException
+     * @param Asset $asset
+     * @param PublishOptions $options
+     * @return OperationResult
      */
-    public function sendRequest($method, $url, array $headers = [], array $body = []): HttpResponse;
+    public function publish(Asset $asset, PublishOptions $options): OperationResult;
+
+    /**
+     * @param string $uai
+     * @param GetOptions $options
+     * @return OperationResult
+     */
+    public function get(string $uai, GetOptions $options): OperationResult;
+
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options);
 }

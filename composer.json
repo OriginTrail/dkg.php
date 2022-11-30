@@ -1,16 +1,33 @@
 {
-    "name": "veljkoterzic/dkg.php",
+    "name": "origintrail/dkg.php",
     "description": "PHP library for interaction with the OriginTrail Decentralized Knowledge Graph",
     "type": "library",
     "license": "Apache-2.0",
+    "version": "0.3.0",
+    "keywords": [
+        "origintrail",
+        "knowledge",
+        "graph",
+        "dkg",
+        "blockchain",
+        "ot-node",
+        "v6"
+    ],
+    "homepage": "https://github.com/OriginTrail/dkg.php",
     "authors": [
         {
             "name": "Trace Labs Group"
         }
     ],
     "require": {
+        "php": "^7.3",
         "guzzlehttp/guzzle": "^7.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "digitalbazaar/json-ld": "^0.4.7",
+        "kornrunner/keccak": "^1.1",
+        "kornrunner/solidity": "^0.2.0",
+        "web3p/web3.php": "dev-master",
+        "web3p/ethereum-tx": "^0.4.3"
     },
     "autoload": {
         "psr-4": {

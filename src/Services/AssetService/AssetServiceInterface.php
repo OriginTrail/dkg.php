@@ -15,22 +15,22 @@ interface AssetServiceInterface
      * @param array $stepHooks
      * @return PublishResult
      */
-    public function create(array $content, ?PublishOptions $options, array $stepHooks): PublishResult;
+    public function create(array $content, ?PublishOptions $options = null, array $stepHooks = []): PublishResult;
 
     /**
      * @param string $uai
      * @param GetOptions|null $options
      * @return GetResult
      */
-    public function get(string $uai, ?GetOptions $options): GetResult;
+    public function get(string $uai, ?GetOptions $options = null): GetResult;
 
     /**
      * @param string $uai
-     * @param array $update
+     * @param array $content
      * @param PublishOptions|null $options
      * @return PublishResult
      */
-    public function update(string $uai, array $update, ?PublishOptions $options): PublishResult;
+    public function update(string $uai, array $content, ?PublishOptions $options = null): PublishResult;
 
     public function transfer();
 

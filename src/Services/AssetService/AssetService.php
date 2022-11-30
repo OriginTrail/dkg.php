@@ -46,7 +46,7 @@ class AssetService implements AssetServiceInterface
      * @throws ServiceMisconfigurationException
      * @throws Exception
      */
-    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): PublishResult
+    public function create(array $content, ?PublishOptions $options = null, array $stepHooks = []): PublishResult
     {
         if (!isset($options)) {
             $options = PublishOptions::default();

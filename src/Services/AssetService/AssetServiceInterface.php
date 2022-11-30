@@ -15,14 +15,14 @@ interface AssetServiceInterface
      * @param array $stepHooks
      * @return PublishResult
      */
-    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): PublishResult;
+    public function create(array $content, ?PublishOptions $options, array $stepHooks): PublishResult;
 
     /**
      * @param string $uai
      * @param GetOptions|null $options
      * @return GetResult
      */
-    public function get(string $uai, ?GetOptions $options = null): GetResult;
+    public function get(string $uai, ?GetOptions $options): GetResult;
 
     /**
      * @param string $uai

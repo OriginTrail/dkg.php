@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @copyright 2020 Matthew Nagi
+ * @license http://opensource.org/licenses/BSD-2-Clause BSD 2-Clause License
+ */
 declare(strict_types=1);
 
 namespace Dkg\Services\AssertionTools\Infrastructure;

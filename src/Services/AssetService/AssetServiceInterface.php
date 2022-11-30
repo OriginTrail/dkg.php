@@ -2,10 +2,10 @@
 
 namespace Dkg\Services\AssetService;
 
-use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\GetResult;
 use Dkg\Services\AssetService\Dto\PublishOptions;
+use Dkg\Services\AssetService\Dto\PublishResult;
 
 interface AssetServiceInterface
 {
@@ -13,9 +13,9 @@ interface AssetServiceInterface
      * @param array $content
      * @param PublishOptions|null $options
      * @param array $stepHooks
-     * @return Asset
+     * @return PublishResult
      */
-    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset;
+    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): PublishResult;
 
     /**
      * @param string $uai
@@ -24,7 +24,13 @@ interface AssetServiceInterface
      */
     public function get(string $uai, ?GetOptions $options = null): GetResult;
 
-    public function update();
+    /**
+     * @param string $uai
+     * @param array $update
+     * @param PublishOptions|null $options
+     * @return PublishResult
+     */
+    public function update(string $uai, array $update, ?PublishOptions $options): PublishResult;
 
     public function transfer();
 

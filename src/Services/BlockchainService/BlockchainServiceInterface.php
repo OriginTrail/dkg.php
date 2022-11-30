@@ -26,4 +26,10 @@ interface BlockchainServiceInterface
      * @return mixed
      */
     public function getLatestAssertionId(int $tokenId, BlockchainConfig $config);
+
+    /**
+     * @param Asset $asset
+     * @param PublishOptions|null $options
+     */
+    public function updateAsset(Asset $asset, ?PublishOptions $options);
 }

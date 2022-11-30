@@ -86,11 +86,25 @@ class Web3Proxy implements Web3ProxyInterface
     {
         $response = $this->callContractFunction($this->contentAssetContract, 'getAssertionsLength', $tokenId);
         $length = $response[0];
-        $length = (int) $length->toString();
+        $length = (int)$length->toString();
 
         [$assertion] = $this->callContractFunction($this->contentAssetContract, 'getAssertionByIndex', $tokenId, $length - 1);
 
         return $assertion;
+    }
+
+    /**
+     * @throws BlockchainException
+     */
+    public function updateAsset(array $args, BlockchainConfig $config)
+    {
+        $this->executeContractFunction(
+            $this->contentAssetContract,
+            $config,
+            'updateAsset',
+            ...$args
+        );
+
     }
 
     /**
@@ -248,8 +262,6 @@ class Web3Proxy implements Web3ProxyInterface
      */
     private function getGasLimit(Contract $contract, $txParams): BigInteger
     {
-        $estimatedGas = null;
-
         $contract->getEth()->estimateGas($txParams, function ($err, $gas) use (&$estimatedGas) {
             if ($err) {
                 throw new BlockchainException($err->getMessage());

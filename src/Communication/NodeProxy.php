@@ -105,6 +105,21 @@ class NodeProxy implements NodeProxyInterface
         ];
     }
 
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options)
+    {
+        $url = $this->getBaseUrl($options->getHttpConfig()) . '/bid-suggestion';
+        $headers = $this->prepareHeaders($options->getHttpConfig());
+        $headers = array_merge($headers, [
+            'query' => [
+                'blockchain' => $options->getBlockchainConfig()->getBlockchainName(),
+                'epochsNumber' => $options->getEpochsNum(),
+                'assertionSize' => $assertionSize
+            ]
+        ]);
+
+        $this->client->get($url, $headers);
+    }
+
     /**
      * @param string $url
      * @param array $body
@@ -235,7 +250,3 @@ class NodeProxy implements NodeProxyInterface
         return $mergedConfig;
     }
 }
-
-
-
-

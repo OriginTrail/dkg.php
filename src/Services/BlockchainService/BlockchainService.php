@@ -2,6 +2,7 @@
 
 namespace Dkg\Services\BlockchainService;
 
+use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\PublishOptions;
@@ -35,8 +36,8 @@ class BlockchainService implements BlockchainServiceInterface
             $asset->getAssertionId(),
             $asset->getAssertionSize(),
             $asset->getTriplesCount(),
-            $options->getEpochsNum(),
             $asset->getChunkCount(),
+            $options->getEpochsNum(),
             $options->getTokenAmount()
         ];
 
@@ -59,6 +60,32 @@ class BlockchainService implements BlockchainServiceInterface
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
         return $proxy->getLatestAssertionId($tokenId);
+    }
+
+
+    /**
+     * @throws ServiceMisconfigurationException
+     * @throws BlockchainException
+     */
+    public function updateAsset(Asset $asset, ?PublishOptions $options)
+    {
+        $config = $this->getMergedConfig($options->getBlockchainConfig());
+        $blockchainName = $config->getBlockchainName();
+        $proxy = $this->web3ProxyManager->getProxy($blockchainName);
+
+        $proxy->increaseAllowance($options->getTokenAmount(), $config);
+
+        $updateAssetArgs = [
+            $asset->getTokenId(),
+            $asset->getAssertionId(),
+            $asset->getAssertionSize(),
+            $asset->getTriplesCount(),
+            $asset->getChunkCount(),
+            $options->getEpochsNum(),
+            $options->getTokenAmount()
+        ];
+
+        $proxy->updateAsset($updateAssetArgs, $config);
     }
 
     /**

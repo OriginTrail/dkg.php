@@ -28,4 +28,6 @@ interface NodeProxyInterface
      * @return OperationResult
      */
     public function get(string $uai, GetOptions $options): OperationResult;
+
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options);
 }

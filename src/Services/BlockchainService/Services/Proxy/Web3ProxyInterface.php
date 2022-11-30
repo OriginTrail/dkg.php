@@ -32,5 +32,11 @@ interface Web3ProxyInterface
      */
     public function createAsset(array $args, BlockchainConfig $config): array;
 
+    /**
+     * @param int $tokenId
+     * @return string
+     */
     public function getLatestAssertionId(int $tokenId): string;
+
+    public function updateAsset(array $args, BlockchainConfig $config);
 }

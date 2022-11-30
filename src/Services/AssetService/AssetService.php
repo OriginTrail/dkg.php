@@ -13,6 +13,7 @@ use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\GetResult;
 use Dkg\Services\AssetService\Dto\PublishOptions;
+use Dkg\Services\AssetService\Dto\PublishResult;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
 use Dkg\Services\Constants;
@@ -45,7 +46,7 @@ class AssetService implements AssetServiceInterface
      * @throws ServiceMisconfigurationException
      * @throws Exception
      */
-    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): Asset
+    public function create(array $content, ?PublishOptions $options, array $stepHooks = []): PublishResult
     {
         if (!isset($options)) {
             $options = PublishOptions::default();
@@ -82,7 +83,11 @@ class AssetService implements AssetServiceInterface
             );
         }
 
-        return $asset;
+        $result = new PublishResult();
+        $result->setAsset($asset);
+        $result->setOperationResult($nodeResponse);
+
+        return $result;
     }
 
     /**
@@ -90,11 +95,15 @@ class AssetService implements AssetServiceInterface
      */
     public function get(string $uai, ?GetOptions $options = null): GetResult
     {
+        if (!$this->validateUai($uai)) {
+            throw new InvalidArgumentException("Invalid UAI '$uai'");
+        }
+
         if (!isset($options)) {
             $options = GetOptions::default();
         }
 
-        [, , $tokenId] = $this->getUaiElements($uai);
+        $tokenId = $this->getTokenId($uai);
 
         $assertionId = $this->blockchainService->getLatestAssertionId($tokenId, $options->getBlockchainConfig());
 
@@ -125,9 +134,58 @@ class AssetService implements AssetServiceInterface
         return $result;
     }
 
-    public function update()
+    /**
+     * @throws InvalidRequestException
+     * @throws NodeProxyException
+     * @throws Exception
+     */
+    public function update(string $uai, array $content, ?PublishOptions $options = null): PublishResult
     {
-        // TODO: Implement update() method.
+        if (!$this->validateUai($uai)) {
+            throw new InvalidArgumentException("Invalid UAI '$uai'");
+        }
+
+        if (!isset($options)) {
+            $options = PublishOptions::default();
+        }
+
+        try {
+            $this->validatePublishRequest($content, $options);
+            $assertion = AssertionTools::formatAssertion($content);
+        } catch (Exception $e) {
+            throw new InvalidRequestException("Invalid publish request. {$e->getMessage()}");
+        }
+
+        [$blockchain, $assetContract, $tokenId] = $this->getUaiElements($uai);
+        $assertionSize = AssertionTools::getSizeInBytes($assertion);
+        $asset = new Asset();
+        $asset->setAssertion($assertion);
+        $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
+        $asset->setAssertionSize($assertionSize);
+        $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
+        $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
+        $asset->setBlockchain($blockchain);
+        $asset->setContract($assetContract);
+        $asset->setTokenId($tokenId);
+
+        $bidSuggestion = $this->nodeProxy->getBidSuggestion($assertionSize, $options);
+
+        $this->blockchainService->updateAsset($asset, $options);
+
+        $nodeResponse = $this->nodeProxy->publish($asset, $options);
+
+        if (!$nodeResponse->isSuccess()) {
+            throw new NodeProxyException(
+                "Publish operation failed. OperationId {$nodeResponse->getOperationId()}",
+                $nodeResponse
+            );
+        }
+
+        $result = new PublishResult();
+        $result->setAsset($asset);
+        $result->setOperationResult($nodeResponse);
+
+        return $result;
     }
 
     public function transfer()
@@ -181,6 +239,23 @@ class AssetService implements AssetServiceInterface
     private function createUai(?string $blockchain, ?string $contract, ?int $tokenId): string
     {
         return "did:$blockchain:$contract/$tokenId";
+    }
+
+    private function validateUai(string $uai): bool
+    {
+        return !empty($this->getUaiElements($uai));
+    }
+
+    private function getTokenId(string $uai): ?string
+    {
+        $elements = $this->getUaiElements($uai);
+        if (!$elements) {
+            return null;
+        }
+
+        [, , $tokenId] = $elements;
+
+        return $tokenId;
     }
 
     /**

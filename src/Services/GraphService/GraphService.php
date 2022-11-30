@@ -4,6 +4,7 @@ namespace Dkg\Services\GraphService;
 
 use Dkg\Communication\HttpConfig;
 use Dkg\Communication\NodeProxyInterface;
+use Dkg\Communication\OperationResult;
 use Dkg\Services\Params;
 
 class GraphService implements GraphServiceInterface
@@ -16,7 +17,7 @@ class GraphService implements GraphServiceInterface
         $this->nodeProxy = $nodeProxy;
     }
 
-    public function query(string $query, ?string $queryType = Params::QUERY_TYPE_SELECT, ?HttpConfig $config = null): array
+    public function query(string $query, ?string $queryType = Params::QUERY_TYPE_SELECT, ?HttpConfig $config = null): OperationResult
     {
         if ($config) {
             $config = HttpConfig::default();
@@ -24,6 +25,13 @@ class GraphService implements GraphServiceInterface
 
         $response = $this->nodeProxy->query($query, $queryType, $config);
 
-        return json_decode(json_encode($response->getData()), true);
+        if(!$response->isSuccess()) {
+            return $response;
+        }
+
+        $jsonData = json_decode(json_encode($response->getData()), true);
+        $response->setData($jsonData);
+
+        return $response;
     }
 }

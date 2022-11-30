@@ -60,7 +60,7 @@ echo json_encode([
 echo "\n\n ------ QUERY ------\n";
 
 $query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { ?id foaf:name ?name }";
-$data = $dkg->graph()->query($query, "SELECT");
+$response = $dkg->graph()->query($query, "SELECT");
 
-echo json_encode($data);
+echo json_encode($response->getData());
 echo "\n";

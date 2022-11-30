@@ -9,6 +9,7 @@ use Dkg\Services\AssetService\AssetService;
 use Dkg\Services\AssetService\AssetServiceInterface;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\Services\Proxy\Web3ProxyManager;
+use Dkg\Services\GraphService\GraphService;
 use Dkg\Services\GraphService\GraphServiceInterface;
 use Dkg\Services\NodeService\NodeService;
 use Dkg\Services\NodeService\NodeServiceInterface;
@@ -18,11 +19,14 @@ use Dkg\Services\NodeService\NodeServiceInterface;
  */
 class Dkg implements DkgInterface
 {
-    /** @var NodeService */
+    /** @var NodeServiceInterface */
     private $nodeService;
 
-    /** @var AssetService */
+    /** @var AssetServiceInterface */
     private $assetService;
+
+    /** @var GraphServiceInterface */
+    private $graphService;
 
     public function __construct(DkgConfig $config)
     {
@@ -32,6 +36,7 @@ class Dkg implements DkgInterface
 
         $this->nodeService = new NodeService($nodeProxy);
         $this->assetService = new AssetService($nodeProxy, $blockchainService);
+        $this->graphService = new GraphService($nodeProxy);
     }
 
     public function asset(): AssetServiceInterface
@@ -46,6 +51,6 @@ class Dkg implements DkgInterface
 
     public function graph(): GraphServiceInterface
     {
-        // TODO: Implement graph() method.
+        return $this->graphService;
     }
 }

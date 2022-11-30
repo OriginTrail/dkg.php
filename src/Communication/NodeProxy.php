@@ -11,7 +11,7 @@ use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\PublishOptions;
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 
 class NodeProxy implements NodeProxyInterface
 {
@@ -68,7 +68,7 @@ class NodeProxy implements NodeProxyInterface
         ];
 
         switch ($options->getPublishType()) {
-            case Constants::PUBLISH_TYPE_ASSET:
+            case Params::PUBLISH_TYPE_ASSET:
                 $body = [
                     'blockchain' => $asset->getBlockchain(),
                     'contract' => $asset->getContract(),
@@ -118,6 +118,23 @@ class NodeProxy implements NodeProxyInterface
         ]);
 
         $this->client->get($url, $headers);
+    }
+
+
+    /**
+     * @throws ServiceMisconfigurationException
+     * @throws NodeProxyException
+     */
+    public function query(string $query, string $queryType, ?HttpConfig $config): OperationResult
+    {
+        $url = $this->getBaseUrl($config) . '/query';
+        $headers = $this->prepareHeaders($config);
+        $body = [
+            'query' => $query,
+            'type' => $queryType
+        ];
+
+        return $this->processAsync($url, $body, $headers);
     }
 
     /**

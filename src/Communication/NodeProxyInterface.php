@@ -30,4 +30,6 @@ interface NodeProxyInterface
     public function get(string $uai, GetOptions $options): OperationResult;
 
     public function getBidSuggestion(int $assertionSize, PublishOptions $options);
+
+    public function query(string $query, string $queryType, ?HttpConfig $config): OperationResult;
 }

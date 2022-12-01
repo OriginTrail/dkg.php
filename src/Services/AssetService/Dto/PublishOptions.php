@@ -18,8 +18,8 @@ class PublishOptions extends RequestOptions
     /** @var int|null */
     private $epochsNum;
 
-    /** @var float|null */
-    private $tokenAmount;
+    /** @var float|null Bid amount in ether. */
+    private $bidAmount;
 
     /** @var int|null */
     private $hashFunctionId;
@@ -79,19 +79,23 @@ class PublishOptions extends RequestOptions
     }
 
     /**
+     * Returns bid amount in ether.
      * @return float|null
      */
-    public function getTokenAmount(): ?float
+    public function getBidAmount(): ?float
     {
-        return $this->tokenAmount;
+        return $this->bidAmount;
     }
 
     /**
-     * @param float|null $tokenAmount
+     * Sets bid amount in ether.
+     * If bid amount is not set, bid suggestion will be taken
+     * from the network.
+     * @param float|null $bidAmount
      */
-    public function setTokenAmount(?float $tokenAmount): void
+    public function setBidAmount(?float $bidAmount): void
     {
-        $this->tokenAmount = $tokenAmount;
+        $this->bidAmount = $bidAmount;
     }
 
     /**
@@ -110,13 +114,16 @@ class PublishOptions extends RequestOptions
         $this->hashFunctionId = $hashFunctionId;
     }
 
+    /**
+     * Validate whether mandatory fields are present.
+     * @return bool
+     */
     public function validate(): bool
     {
         return
             $this->publishType &&
             isset($this->localStore) &&
             $this->epochsNum &&
-            $this->tokenAmount &&
             isset($this->hashFunctionId);
     }
 
@@ -126,7 +133,6 @@ class PublishOptions extends RequestOptions
         $options->setPublishType(Params::PUBLISH_TYPE_ASSET);
         $options->setLocalStore(false);
         $options->setEpochsNum(Params::PUBLISH_DEFAULT_EPOCH_NUM);
-        $options->setTokenAmount(Params::PUBLISH_DEFAULT_TOKEN_AMOUNT);
         $options->setHashFunctionId(Params::DEFAULT_HASH_FUNCTION_ID);
         $options->setBlockchainConfig(new BlockchainConfig());
         $options->setHttpConfig(new HttpConfig());

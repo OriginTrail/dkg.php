@@ -107,7 +107,7 @@ class BlockchainConfig
     }
 
     /**
-     * Returns bool indicator whether config is validated
+     * Validate whether mandatory fields are present.
      * @return bool
      */
     public function validate(): bool

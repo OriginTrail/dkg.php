@@ -58,10 +58,19 @@ class AssetService implements AssetServiceInterface
             throw new InvalidRequestException("Invalid publish request. {$e->getMessage()}");
         }
 
+        $assertionSize = AssertionTools::getSizeInBytes($assertion);
+
+        if (!$options->getBidAmount()) {
+            $mergedConfig = $this->blockchainService->getMergedConfig($options->getBlockchainConfig());
+            $options->setBlockchainConfig($mergedConfig);
+            $bidAmount = $this->nodeProxy->getBidSuggestion($assertionSize, $options);
+            $options->setBidAmount($bidAmount);
+        }
+
         $asset = new Asset();
         $asset->setAssertion($assertion);
         $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
-        $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
+        $asset->setAssertionSize($assertionSize);
         $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
         $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
 

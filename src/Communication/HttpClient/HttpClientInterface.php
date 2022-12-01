@@ -9,13 +9,13 @@ interface HttpClientInterface
     /**
      * @param string $method
      * @param string $url
-     * @param array $headers
+     * @param array $options
      * @param array $body
      * @return HttpResponse
      */
-    public function sendRequest(string $method, string $url, array $headers = [], array $body = []): HttpResponse;
+    public function sendRequest(string $method, string $url, array $options = [], array $body = []): HttpResponse;
 
-    public function get(string $url, $headers = []): HttpResponse;
+    public function get(string $url, $options = []): HttpResponse;
 
     public function post(string $url, $body = [], $headers = []): HttpResponse;
 

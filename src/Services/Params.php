@@ -13,7 +13,6 @@ class Params
     public const DEFAULT_HASH_FUNCTION_ID = 0;
 
     public const PUBLISH_DEFAULT_EPOCH_NUM = 5;
-    public const PUBLISH_DEFAULT_TOKEN_AMOUNT = 15;
     public const PUBLISH_TYPE_ASSET = 'asset';
 
     public const GET_DEFAULT_VALIDATE = true;

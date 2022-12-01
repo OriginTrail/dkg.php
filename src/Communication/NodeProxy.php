@@ -109,7 +109,7 @@ class NodeProxy implements NodeProxyInterface
     {
         $url = $this->getBaseUrl($options->getHttpConfig()) . '/bid-suggestion';
         $headers = $this->prepareHeaders($options->getHttpConfig());
-        $headers = array_merge($headers, [
+        $reqOptions = array_merge($headers, [
             'query' => [
                 'blockchain' => $options->getBlockchainConfig()->getBlockchainName(),
                 'epochsNumber' => $options->getEpochsNum(),
@@ -117,7 +117,8 @@ class NodeProxy implements NodeProxyInterface
             ]
         ]);
 
-        $this->client->get($url, $headers);
+        $response = $this->client->get($url, $reqOptions);
+        return $response->getBodyAsObject()->data->bidSuggestion;
     }
 
 
@@ -211,7 +212,9 @@ class NodeProxy implements NodeProxyInterface
         }
 
         return [
-            'Authorization' => "Bearer $token"
+            'headers' => [
+                'Authorization' => "Bearer $token"
+            ]
         ];
     }
 

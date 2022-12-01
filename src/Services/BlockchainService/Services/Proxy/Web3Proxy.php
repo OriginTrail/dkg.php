@@ -54,13 +54,13 @@ class Web3Proxy implements Web3ProxyInterface
     public function increaseAllowance(float $amount, BlockchainConfig $config)
     {
         // bid amount is passed in ether, blockchain expects wei
-        $amount = $this->toWei($amount, 'ether');
+        $weiAmount = $this->toWei($amount, 'ether');
         $this->executeContractFunction(
             $this->tokenContract,
             $config,
             'increaseAllowance',
             $this->serviceAgreementStorageContract->getToAddress(),
-            $amount,
+            $weiAmount,
         );
     }
 
@@ -221,10 +221,10 @@ class Web3Proxy implements Web3ProxyInterface
 
     /**
      * @param Contract $contract
-     * @return int
+     * @return string
      * @throws BlockchainException
      */
-    private function getGasPrice(Contract $contract): int
+    private function getGasPrice(Contract $contract): string
     {
         $gasPrice = null;
 
@@ -237,7 +237,7 @@ class Web3Proxy implements Web3ProxyInterface
             });
 
             $gasPrice = new BigInteger((int)$gasPrice->toString());
-            $gasPrice = (int)$gasPrice->toString();
+            $gasPrice = $gasPrice->toString();
         } else {
             $gasPrice = $this->toWei("100", "Gwei");
         }
@@ -248,10 +248,10 @@ class Web3Proxy implements Web3ProxyInterface
     /**
      * @param Contract $contract
      * @param string $ownerAccount
-     * @return int
+     * @return string
      * @throws BlockchainException
      */
-    private function getTransactionCount(Contract $contract, string $ownerAccount): int
+    private function getTransactionCount(Contract $contract, string $ownerAccount): string
     {
         $transactionCount = null;
 
@@ -262,16 +262,16 @@ class Web3Proxy implements Web3ProxyInterface
             $transactionCount = $transactionCountResult;
         });
 
-        return (int)$transactionCount->toString();
+        return $transactionCount->toString();
     }
 
     /**
      * @param Contract $contract
      * @param $txParams
-     * @return int
+     * @return string
      * @throws BlockchainException
      */
-    private function getGasLimit(Contract $contract, $txParams): int
+    private function getGasLimit(Contract $contract, $txParams): string
     {
         $contract->getEth()->estimateGas($txParams, function ($err, $gas) use (&$estimatedGas) {
             if ($err) {
@@ -280,7 +280,7 @@ class Web3Proxy implements Web3ProxyInterface
             $estimatedGas = $gas;
         });
 
-        $estimatedGas = (int)$estimatedGas->toString();
+        $estimatedGas = $estimatedGas->toString();
 
         if (!$estimatedGas) {
             return $this->toWei(1000, 'kwei');
@@ -380,10 +380,10 @@ class Web3Proxy implements Web3ProxyInterface
     /**
      * @param $amount mixed amount of tokens in ether
      * @param string $unit
-     * @return int
+     * @return string
      */
-    private function toWei($amount, string $unit): int
+    private function toWei($amount, string $unit): string
     {
-        return (int)Utils::toWei((string)$amount, $unit)->toString();
+        return Utils::toWei((string)$amount, $unit)->toString();
     }
 }

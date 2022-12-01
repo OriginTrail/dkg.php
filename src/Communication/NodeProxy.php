@@ -105,7 +105,7 @@ class NodeProxy implements NodeProxyInterface
         ];
     }
 
-    public function getBidSuggestion(int $assertionSize, PublishOptions $options)
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options): float
     {
         $url = $this->getBaseUrl($options->getHttpConfig()) . '/bid-suggestion';
         $headers = $this->prepareHeaders($options->getHttpConfig());
@@ -118,7 +118,7 @@ class NodeProxy implements NodeProxyInterface
         ]);
 
         $response = $this->client->get($url, $reqOptions);
-        return $response->getBodyAsObject()->data->bidSuggestion;
+        return $response->getBodyAsObject()->bidSuggestion;
     }
 
 

@@ -29,7 +29,13 @@ interface NodeProxyInterface
      */
     public function get(string $uai, GetOptions $options): OperationResult;
 
-    public function getBidSuggestion(int $assertionSize, PublishOptions $options);
+    /**
+     * Returns bid suggestion in Ether
+     * @param int $assertionSize
+     * @param PublishOptions $options
+     * @return float bid suggestion in Ether
+     */
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options): float;
 
     public function query(string $query, string $queryType, ?HttpConfig $config): OperationResult;
 }

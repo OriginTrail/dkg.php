@@ -114,7 +114,12 @@ class Web3Proxy implements Web3ProxyInterface
             'updateAsset',
             ...$args
         );
+    }
 
+    public function getOwner(string $tokenId): string
+    {
+        $response = $this->callContractFunction($this->contentAssetContract, 'ownerOf', $tokenId);
+        return $response[0];
     }
 
     /**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73f8f46ee3e7dcef77f8a37744ad573a",
+    "content-hash": "d0204957e8cf3f6c8490e254efb147fb",
     "packages": [
         {
             "name": "digitalbazaar/json-ld",
@@ -1342,7 +1342,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.3",
+        "php": "^7.3|^8.0",
         "ext-json": "*"
     },
     "platform-dev": [],

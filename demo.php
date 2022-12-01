@@ -8,10 +8,10 @@ use Dkg\Services\AssetService\Dto\PublishOptions;
 
 // Dkg configuration
 $dkgConfig = new DkgConfig();
-$dkgConfig->getHttpConfig()->setBaseUrl('http://localhost:8904');
-$dkgConfig->getBlockchainConfig()->setBlockchainName('ganache');
-$dkgConfig->getBlockchainConfig()->setPublicKey('0xd6879c0a03add8cfc43825a42a3f3cf44db7d2b9');
-$dkgConfig->getBlockchainConfig()->setPrivateKey('02b39cac1532bef9dba3e36ec32d3de1e9a88f1dda597d3ac6e2130aed9adc4e');
+$dkgConfig->getHttpConfig()->setBaseUrl('');
+$dkgConfig->getBlockchainConfig()->setBlockchainName('');
+$dkgConfig->getBlockchainConfig()->setPublicKey('');
+$dkgConfig->getBlockchainConfig()->setPrivateKey('');
 
 $dkg = new Dkg($dkgConfig);
 
@@ -31,25 +31,22 @@ $dataset = [
 echo "\n--- PUBLISH ---\n";
 
 $publishOptions = PublishOptions::default();
-$publishOptions->setTokenAmount(7);
 // base configuration of HttpConfig and BlockchainConfig can be overriden inside publishOptions
 $publishOptions->getBlockchainConfig()->setNumOfRetries(100);
 $response = $dkg->asset()->create($dataset, $publishOptions);
 
-
-echo "Publish succeeded.\n";
 echo json_encode([
     'UAI' => $response->getAsset()->getUai(),
     'assertionId' => $response->getAsset()->getAssertionId(),
     'assertion' => json_encode($response->getAsset()->getAssertion())
 ]);
 
+
 echo "\n\n----- GET -----\n";
 
 $uai = $response->getAsset()->getUai();
 
 $response = $dkg->asset()->get($uai);
-echo "Get succeeded. \n\n";
 
 echo json_encode([
     'assertion' => $response->getAssertion(),
@@ -63,4 +60,12 @@ $query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { ?id foaf:na
 $response = $dkg->graph()->query($query, "SELECT");
 
 echo json_encode($response->getData());
+echo "\n\n";
+
+
+echo "\n\n ------ GET OWNER ------\n";
+
+$owner = $dkg->asset()->getOwner($uai);
+
+echo json_encode($owner);
 echo "\n";

@@ -88,6 +88,20 @@ class BlockchainService implements BlockchainServiceInterface
         $proxy->updateAsset($updateAssetArgs, $config);
     }
 
+
+    /**
+     * @throws ServiceMisconfigurationException
+     */
+    public function getAssetOwner(string $uai, ?BlockchainConfig $config = null): ?string
+    {
+        $config = $this->getMergedConfig($config);
+        $blockchainName = $config->getBlockchainName();
+        $proxy = $this->web3ProxyManager->getProxy($blockchainName);
+
+        // todo enhance error handling
+        return $proxy->getOwner($uai);
+    }
+
     /**
      * @throws ServiceMisconfigurationException
      */

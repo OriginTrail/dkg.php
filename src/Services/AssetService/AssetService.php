@@ -16,6 +16,7 @@ use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\AssetService\Dto\PublishResult;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 use Dkg\Services\Params;
 use Dkg\Services\JsonLD;
 use Exception;
@@ -201,9 +202,15 @@ class AssetService implements AssetServiceInterface
         // TODO: Implement transfer() method.
     }
 
-    public function getOwner()
+    public function getOwner(string $uai, ?BlockchainConfig $config = null): ?string
     {
-        // TODO: Implement getOwner() method.
+        if (!$this->validateUai($uai)) {
+            throw new InvalidArgumentException("Invalid UAI. $uai");
+        }
+
+        $tokenId = $this->getTokenId($uai);
+        $owner = $this->blockchainService->getAssetOwner($tokenId, $config);
+        return $owner;
     }
 
     /**

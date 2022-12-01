@@ -6,6 +6,7 @@ use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\GetResult;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\AssetService\Dto\PublishResult;
+use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
 
 interface AssetServiceInterface
 {
@@ -34,5 +35,5 @@ interface AssetServiceInterface
 
     public function transfer();
 
-    public function getOwner();
+    public function getOwner(string $uai, ?BlockchainConfig $config = null): ?string;
 }

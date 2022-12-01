@@ -39,4 +39,6 @@ interface Web3ProxyInterface
     public function getLatestAssertionId(int $tokenId): string;
 
     public function updateAsset(array $args, BlockchainConfig $config);
+
+    public function getOwner(string $tokenId): string;
 }

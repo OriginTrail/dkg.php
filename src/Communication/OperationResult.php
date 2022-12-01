@@ -7,7 +7,7 @@ class OperationResult
     /** @var string */
     private $status;
 
-    /** @var object|null */
+    /** @var object|array|null */
     private $data;
 
     /** @var string|null */
@@ -15,10 +15,10 @@ class OperationResult
 
     /**
      * @param string $status
-     * @param object|null $data
+     * @param object|array|null $data
      * @param string|null $operationId
      */
-    public function __construct(string $status, ?object $data, ?string $operationId)
+    public function __construct(string $status, $data, ?string $operationId)
     {
         $this->status = $status;
         $this->data = $data;
@@ -42,17 +42,17 @@ class OperationResult
     }
 
     /**
-     * @return object|null
+     * @return array|object|null
      */
-    public function getData(): ?object
+    public function getData()
     {
         return $this->data;
     }
 
     /**
-     * @param object|null $data
+     * @param array|object|null $data
      */
-    public function setData(?object $data): void
+    public function setData($data): void
     {
         $this->data = $data;
     }

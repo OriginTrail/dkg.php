@@ -32,4 +32,11 @@ interface BlockchainServiceInterface
      * @param PublishOptions|null $options
      */
     public function updateAsset(Asset $asset, ?PublishOptions $options);
+
+    /**
+     * Merged request and base configuration
+     * @param BlockchainConfig|null $config
+     * @return BlockchainConfig
+     */
+    public function getMergedConfig(?BlockchainConfig $config): BlockchainConfig;
 }

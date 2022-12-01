@@ -11,7 +11,7 @@ use Dkg\Exceptions\ServiceMisconfigurationException;
 use Dkg\Services\AssetService\Dto\Asset;
 use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\PublishOptions;
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 
 class NodeProxy implements NodeProxyInterface
 {
@@ -68,7 +68,7 @@ class NodeProxy implements NodeProxyInterface
         ];
 
         switch ($options->getPublishType()) {
-            case Constants::PUBLISH_TYPE_ASSET:
+            case Params::PUBLISH_TYPE_ASSET:
                 $body = [
                     'blockchain' => $asset->getBlockchain(),
                     'contract' => $asset->getContract(),
@@ -105,11 +105,11 @@ class NodeProxy implements NodeProxyInterface
         ];
     }
 
-    public function getBidSuggestion(int $assertionSize, PublishOptions $options)
+    public function getBidSuggestion(int $assertionSize, PublishOptions $options): float
     {
         $url = $this->getBaseUrl($options->getHttpConfig()) . '/bid-suggestion';
         $headers = $this->prepareHeaders($options->getHttpConfig());
-        $headers = array_merge($headers, [
+        $reqOptions = array_merge($headers, [
             'query' => [
                 'blockchain' => $options->getBlockchainConfig()->getBlockchainName(),
                 'epochsNumber' => $options->getEpochsNum(),
@@ -117,7 +117,25 @@ class NodeProxy implements NodeProxyInterface
             ]
         ]);
 
-        $this->client->get($url, $headers);
+        $response = $this->client->get($url, $reqOptions);
+        return $response->getBodyAsObject()->bidSuggestion;
+    }
+
+
+    /**
+     * @throws ServiceMisconfigurationException
+     * @throws NodeProxyException
+     */
+    public function query(string $query, string $queryType, ?HttpConfig $config): OperationResult
+    {
+        $url = $this->getBaseUrl($config) . '/query';
+        $headers = $this->prepareHeaders($config);
+        $body = [
+            'query' => $query,
+            'type' => $queryType
+        ];
+
+        return $this->processAsync($url, $body, $headers);
     }
 
     /**
@@ -194,7 +212,9 @@ class NodeProxy implements NodeProxyInterface
         }
 
         return [
-            'Authorization' => "Bearer $token"
+            'headers' => [
+                'Authorization' => "Bearer $token"
+            ]
         ];
     }
 

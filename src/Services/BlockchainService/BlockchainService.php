@@ -30,7 +30,7 @@ class BlockchainService implements BlockchainServiceInterface
         $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($options->getTokenAmount(), $config);
+        $proxy->increaseAllowance($options->getBidAmount(), $config);
 
         $createAssetArgs = [
             $asset->getAssertionId(),
@@ -38,7 +38,7 @@ class BlockchainService implements BlockchainServiceInterface
             $asset->getTriplesCount(),
             $asset->getChunkCount(),
             $options->getEpochsNum(),
-            $options->getTokenAmount()
+            $options->getBidAmount()
         ];
 
         [$contractAddress, $tokenId] = $proxy->createAsset($createAssetArgs, $config);
@@ -73,7 +73,7 @@ class BlockchainService implements BlockchainServiceInterface
         $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($options->getTokenAmount(), $config);
+        $proxy->increaseAllowance($options->getBidAmount(), $config);
 
         $updateAssetArgs = [
             $asset->getTokenId(),
@@ -82,7 +82,7 @@ class BlockchainService implements BlockchainServiceInterface
             $asset->getTriplesCount(),
             $asset->getChunkCount(),
             $options->getEpochsNum(),
-            $options->getTokenAmount()
+            $options->getBidAmount()
         ];
 
         $proxy->updateAsset($updateAssetArgs, $config);
@@ -91,7 +91,7 @@ class BlockchainService implements BlockchainServiceInterface
     /**
      * @throws ServiceMisconfigurationException
      */
-    private function getMergedConfig(?BlockchainConfig $config): BlockchainConfig
+    public function getMergedConfig(?BlockchainConfig $config): BlockchainConfig
     {
         $mergedConfig = new BlockchainConfig();
 

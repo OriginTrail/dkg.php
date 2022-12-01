@@ -17,7 +17,7 @@ interface Web3ProxyInterface
 
     /**
      * Triggers increaseAllowance function on the contract.
-     * @param float $amount
+     * @param float $amount bid amount in ether
      * @param BlockchainConfig $config
      * @return mixed
      * @throws BlockchainException

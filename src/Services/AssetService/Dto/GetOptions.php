@@ -4,7 +4,7 @@ namespace Dkg\Services\AssetService\Dto;
 
 use Dkg\Communication\HttpConfig;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 use Dkg\Services\RequestOptions;
 
 class GetOptions extends RequestOptions
@@ -75,9 +75,9 @@ class GetOptions extends RequestOptions
     public static function default(): GetOptions
     {
         $options = new GetOptions();
-        $options->setValidate(Constants::GET_DEFAULT_VALIDATE);
-        $options->setHashFunctionId(Constants::DEFAULT_HASH_FUNCTION_ID);
-        $options->setOutputFormat(Constants::JSONLD_FORMAT_NQUADS);
+        $options->setValidate(Params::GET_DEFAULT_VALIDATE);
+        $options->setHashFunctionId(Params::DEFAULT_HASH_FUNCTION_ID);
+        $options->setOutputFormat(Params::JSONLD_FORMAT_NQUADS);
 
         return $options;
     }

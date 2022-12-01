@@ -24,20 +24,24 @@ class HttpClient implements HttpClientInterface
         $this->client = new Client();
     }
 
-    public function sendRequest(string $method, string $url, array $headers = [], array $body = []): HttpResponse
+    public function sendRequest(string $method, string $url, array $reqOptions = [], array $body = []): HttpResponse
     {
-        $headers = [
-            'headers' => array_merge($this->getDefaultHeaders(), $headers)
-        ];
+        $options['headers'] = $this->getDefaultHeaders();
+
+        if (isset($reqOptions['headers'])) {
+            $options['headers'] = array_merge($options['headers'], $reqOptions['headers']);
+        }
+
+        if (isset($reqOptions['query'])) {
+            $options['query'] = $reqOptions['query'];
+        }
 
         if (count($body)) {
             $body = ['json' => $body];
         }
 
         try {
-
-
-            $response = $this->client->request($method, $url, array_merge($headers, $body));
+            $response = $this->client->request($method, $url, array_merge($options, $body));
 
             return new HttpResponse(
                 $response->getBody()->getContents(),
@@ -67,9 +71,9 @@ class HttpClient implements HttpClientInterface
     /**
      * @throws NodeProxyException
      */
-    public function get(string $url, $headers = []): HttpResponse
+    public function get(string $url, $options = []): HttpResponse
     {
-        return $this->sendRequest(HttpMethods::GET_METHOD, $url, $headers);
+        return $this->sendRequest(HttpMethods::GET_METHOD, $url, $options);
     }
 
     /**

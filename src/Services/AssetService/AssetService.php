@@ -16,7 +16,7 @@ use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\AssetService\Dto\PublishResult;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
-use Dkg\Services\Constants;
+use Dkg\Services\Params;
 use Dkg\Services\JsonLD;
 use Exception;
 use InvalidArgumentException;
@@ -32,7 +32,6 @@ class AssetService implements AssetServiceInterface
     /** @var BlockchainServiceInterface */
     private $blockchainService;
 
-    // fixme change parameter type to interface
     public function __construct(NodeProxyInterface $nodeProxy, BlockchainServiceInterface $blockchainService)
     {
         $this->nodeProxy = $nodeProxy;
@@ -59,10 +58,19 @@ class AssetService implements AssetServiceInterface
             throw new InvalidRequestException("Invalid publish request. {$e->getMessage()}");
         }
 
+        $assertionSize = AssertionTools::getSizeInBytes($assertion);
+
+        if (!$options->getBidAmount()) {
+            $mergedConfig = $this->blockchainService->getMergedConfig($options->getBlockchainConfig());
+            $options->setBlockchainConfig($mergedConfig);
+            $bidAmount = $this->nodeProxy->getBidSuggestion($assertionSize, $options);
+            $options->setBidAmount($bidAmount);
+        }
+
         $asset = new Asset();
         $asset->setAssertion($assertion);
         $asset->setAssertionId(AssertionTools::calculateRoot($assertion));
-        $asset->setAssertionSize(AssertionTools::getSizeInBytes($assertion));
+        $asset->setAssertionSize($assertionSize);
         $asset->setTriplesCount(AssertionTools::getTriplesCount($assertion));
         $asset->setChunkCount(AssertionTools::getChunkCount($assertion));
 
@@ -122,7 +130,7 @@ class AssetService implements AssetServiceInterface
             }
         }
 
-        if ($options->getOutputFormat() === Constants::JSONLD_FORMAT_NQUADS) {
+        if ($options->getOutputFormat() === Params::JSONLD_FORMAT_NQUADS) {
             $assertion = JsonLD::fromRdf($assertion);
         }
 

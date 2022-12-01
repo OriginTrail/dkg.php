@@ -53,17 +53,23 @@ class Web3Proxy implements Web3ProxyInterface
 
     public function increaseAllowance(float $amount, BlockchainConfig $config)
     {
+        // bid amount is passed in ether, blockchain expects wei
+        $weiAmount = $this->toWei($amount, 'ether');
         $this->executeContractFunction(
             $this->tokenContract,
             $config,
             'increaseAllowance',
             $this->serviceAgreementStorageContract->getToAddress(),
-            $amount,
+            $weiAmount,
         );
     }
 
     public function createAsset(array $args, BlockchainConfig $config): array
     {
+        $bidIndex = count($args) - 1;
+        // bidAmount is passed in ether, blockchain expects wei
+        $args[$bidIndex] = $this->toWei($args[$bidIndex], 'ether');
+
         $receipt = $this->executeContractFunction(
             $this->contentAssetContract,
             $config,
@@ -98,6 +104,10 @@ class Web3Proxy implements Web3ProxyInterface
      */
     public function updateAsset(array $args, BlockchainConfig $config)
     {
+        $bidIndex = count($args) - 1;
+        // bidAmount is passed in ether, blockchain expects wei
+        $args[$bidIndex] = $this->toWei($args[$bidIndex], 'ether');
+
         $this->executeContractFunction(
             $this->contentAssetContract,
             $config,
@@ -198,23 +208,23 @@ class Web3Proxy implements Web3ProxyInterface
             'from' => $from,
             'to' => $to,
             'chainId' => $chainId,
-            'gasPrice' => '0x' . dechex((int)$gasPrice->toString() * 10),
+            'gasPrice' => '0x' . dechex($gasPrice),
             'data' => $rawTransactionData,
-            'nonce' => "0x" . dechex($transactionCount->toString())
+            'nonce' => "0x" . dechex($transactionCount)
         ];
 
         $gasLimit = $this->getGasLimit($contract, $txParams);
-        $txParams['gasLimit'] = '0x' . dechex((int)$gasLimit->toString() * 10);
+        $txParams['gasLimit'] = '0x' . dechex($gasLimit);
 
         return $this->sendTransaction($contract, $txParams, $config);
     }
 
     /**
      * @param Contract $contract
-     * @return BigInteger
+     * @return string
      * @throws BlockchainException
      */
-    private function getGasPrice(Contract $contract): BigInteger
+    private function getGasPrice(Contract $contract): string
     {
         $gasPrice = null;
 
@@ -226,9 +236,10 @@ class Web3Proxy implements Web3ProxyInterface
                 $gasPrice = $result;
             });
 
-            $gasPrice = new BigInteger((int)$gasPrice->toString() * 1000000);
+            $gasPrice = new BigInteger((int)$gasPrice->toString());
+            $gasPrice = $gasPrice->toString();
         } else {
-            $gasPrice = Utils::toWei("100", "Gwei");
+            $gasPrice = $this->toWei("100", "Gwei");
         }
 
         return $gasPrice;
@@ -237,10 +248,10 @@ class Web3Proxy implements Web3ProxyInterface
     /**
      * @param Contract $contract
      * @param string $ownerAccount
-     * @return BigInteger
+     * @return string
      * @throws BlockchainException
      */
-    private function getTransactionCount(Contract $contract, string $ownerAccount): BigInteger
+    private function getTransactionCount(Contract $contract, string $ownerAccount): string
     {
         $transactionCount = null;
 
@@ -251,16 +262,16 @@ class Web3Proxy implements Web3ProxyInterface
             $transactionCount = $transactionCountResult;
         });
 
-        return $transactionCount;
+        return $transactionCount->toString();
     }
 
     /**
      * @param Contract $contract
      * @param $txParams
-     * @return BigInteger
+     * @return string
      * @throws BlockchainException
      */
-    private function getGasLimit(Contract $contract, $txParams): BigInteger
+    private function getGasLimit(Contract $contract, $txParams): string
     {
         $contract->getEth()->estimateGas($txParams, function ($err, $gas) use (&$estimatedGas) {
             if ($err) {
@@ -269,8 +280,10 @@ class Web3Proxy implements Web3ProxyInterface
             $estimatedGas = $gas;
         });
 
-        if (!$estimatedGas->toString()) {
-            return Utils::toWei("1000", "Kwei");
+        $estimatedGas = $estimatedGas->toString();
+
+        if (!$estimatedGas) {
+            return $this->toWei(1000, 'kwei');
         }
 
         return $estimatedGas;
@@ -362,5 +375,15 @@ class Web3Proxy implements Web3ProxyInterface
         }
 
         return $decoded;
+    }
+
+    /**
+     * @param $amount mixed amount of tokens in ether
+     * @param string $unit
+     * @return string
+     */
+    private function toWei($amount, string $unit): string
+    {
+        return Utils::toWei((string)$amount, $unit)->toString();
     }
 }

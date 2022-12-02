@@ -41,4 +41,6 @@ interface Web3ProxyInterface
     public function updateAsset(array $args, BlockchainConfig $config);
 
     public function getOwner(string $tokenId): string;
+
+    public function transferAsset(?string $tokenId, string $toAddress, BlockchainConfig $config);
 }

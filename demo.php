@@ -8,6 +8,7 @@ use Dkg\Services\AssetService\Dto\PublishOptions;
 
 // Dkg configuration
 $dkgConfig = new DkgConfig();
+
 $dkgConfig->getHttpConfig()->setBaseUrl('');
 $dkgConfig->getBlockchainConfig()->setBlockchainName('');
 $dkgConfig->getBlockchainConfig()->setPublicKey('');
@@ -15,10 +16,12 @@ $dkgConfig->getBlockchainConfig()->setPrivateKey('');
 
 $dkg = new Dkg($dkgConfig);
 
-echo "Info route\n";
+echo "---- INFO route ----\n";
 
 $info = $dkg->node()->getInfo();
 echo json_encode($info->getBodyAsArray());
+
+
 
 $dataset = [
     "@context" => "https://json-ld.org/contexts/person.jsonld",
@@ -28,11 +31,10 @@ $dataset = [
     "spouse" => "http://dbpedia.org/resource/Cynthia_Lennon"
 ];
 
+
 echo "\n--- PUBLISH ---\n";
 
 $publishOptions = PublishOptions::default();
-// base configuration of HttpConfig and BlockchainConfig can be overriden inside publishOptions
-$publishOptions->getBlockchainConfig()->setNumOfRetries(100);
 $response = $dkg->asset()->create($dataset, $publishOptions);
 
 echo json_encode([
@@ -67,5 +69,16 @@ echo "\n\n ------ GET OWNER ------\n";
 
 $owner = $dkg->asset()->getOwner($uai);
 
-echo json_encode($owner);
+echo "OWNER: $owner";
+echo "\n";
+
+
+echo "\n\n----- TRANSFER OWNER -----\n";
+
+$response = $dkg->asset()->transfer($uai, '0x34734d828d39ce0B3C8ad22B8578Cd2E3236F277');
+
+
+$owner = $dkg->asset()->getOwner($uai);
+
+echo "NEW OWNER: $owner";
 echo "\n";

@@ -123,6 +123,14 @@ class Web3Proxy implements Web3ProxyInterface
     }
 
     /**
+     * @throws BlockchainException
+     */
+    public function transferAsset(?string $tokenId, string $toAddress, BlockchainConfig $config)
+    {
+        $this->executeContractFunction($this->contentAssetContract, $config, 'transferFrom', $config->getPublicKey(), $toAddress, $tokenId);
+    }
+
+    /**
      * @param string $hubContractAddress
      * @return void
      */

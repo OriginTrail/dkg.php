@@ -18,7 +18,7 @@ class OperationResult
      * @param object|array|null $data
      * @param string|null $operationId
      */
-    public function __construct(string $status, $data, ?string $operationId)
+    public function __construct(string $status, $data = null, ?string $operationId = null)
     {
         $this->status = $status;
         $this->data = $data;

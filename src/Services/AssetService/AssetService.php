@@ -4,6 +4,7 @@ namespace Dkg\Services\AssetService;
 
 use Dkg\Communication\Exceptions\NodeProxyException;
 use Dkg\Communication\NodeProxyInterface;
+use Dkg\Communication\OperationResult;
 use Dkg\Exceptions\BlockchainException;
 use Dkg\Exceptions\HashMismatchException;
 use Dkg\Exceptions\InvalidRequestException;
@@ -14,6 +15,7 @@ use Dkg\Services\AssetService\Dto\GetOptions;
 use Dkg\Services\AssetService\Dto\GetResult;
 use Dkg\Services\AssetService\Dto\PublishOptions;
 use Dkg\Services\AssetService\Dto\PublishResult;
+use Dkg\Services\AssetService\Dto\TransferResult;
 use Dkg\Services\BlockchainService\BlockchainService;
 use Dkg\Services\BlockchainService\BlockchainServiceInterface;
 use Dkg\Services\BlockchainService\Dto\BlockchainConfig;
@@ -83,7 +85,12 @@ class AssetService implements AssetServiceInterface
             $asset->getTokenId()
         ));
 
-        $nodeResponse = $this->nodeProxy->publish($asset, $options);
+        try {
+            $nodeResponse = $this->nodeProxy->publish($asset, $options);
+
+        } catch (NodeProxyException $e) {
+            $v = '';
+        }
 
         if (!$nodeResponse->isSuccess()) {
             throw new NodeProxyException(
@@ -197,9 +204,23 @@ class AssetService implements AssetServiceInterface
         return $result;
     }
 
-    public function transfer()
+    public function transfer(string $uai, string $toAddress, ?BlockchainConfig $blockchainConfig = null): TransferResult
     {
-        // TODO: Implement transfer() method.
+        if (!$this->validateUai($uai)) {
+            throw new InvalidArgumentException("Invalid UAI $uai");
+        }
+
+        $tokenId = $this->getTokenId($uai);
+
+        $this->blockchainService->transferAsset($tokenId, $toAddress, $blockchainConfig);
+        $owner = $this->getOwner($uai, $blockchainConfig);
+
+        $result = new TransferResult();
+        $result->setUai($uai);
+        $result->setOwner($owner);
+        $result->setOperationResult(new OperationResult('COMPLETED'));
+
+        return $result;
     }
 
     public function getOwner(string $uai, ?BlockchainConfig $config = null): ?string
@@ -209,8 +230,8 @@ class AssetService implements AssetServiceInterface
         }
 
         $tokenId = $this->getTokenId($uai);
-        $owner = $this->blockchainService->getAssetOwner($tokenId, $config);
-        return $owner;
+
+        return $this->blockchainService->getAssetOwner($tokenId, $config);
     }
 
     /**

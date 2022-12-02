@@ -41,9 +41,17 @@ interface BlockchainServiceInterface
     public function getMergedConfig(?BlockchainConfig $config): BlockchainConfig;
 
     /**
-     * @param string $uai
+     * @param string $tokenId
      * @param BlockchainConfig|null $config
      * @return string owner address
      */
-    public function getAssetOwner(string $uai, ?BlockchainConfig $config = null): ?string;
+    public function getAssetOwner(string $tokenId, ?BlockchainConfig $config = null): ?string;
+
+    /**
+     * @param string|null $tokenId
+     * @param string $toAddress
+     * @param BlockchainConfig|null $blockchainConfig
+     * @return mixed
+     */
+    public function transferAsset(?string $tokenId, string $toAddress, ?BlockchainConfig $blockchainConfig);
 }

@@ -8,9 +8,8 @@ use Dkg\Services\BlockchainService\Services\AbiManager\Dto\AbiEvent;
 class AbiManager
 {
     public const HUB = 'Hub';
-    public const SERVICE_AGREEMENT_STORAGE = 'ServiceAgreementStorage';
+    public const SERVICE_AGREEMENT = 'ServiceAgreementV1';
     public const CONTENT_ASSET = 'ContentAsset';
-    public const ASSERTION_REGISTRY = 'AssertionRegistry';
     public const ERC20_TOKEN = 'Token';
 
     /** @var string[] */

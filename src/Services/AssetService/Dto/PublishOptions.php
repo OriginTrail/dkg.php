@@ -18,11 +18,19 @@ class PublishOptions extends RequestOptions
     /** @var int|null */
     private $epochsNum;
 
-    /** @var float|null Bid amount in ether. */
-    private $bidAmount;
+    /**
+     * Token amount in ether.
+     * If token amount is not set, bid suggestion will be taken
+     * from the network.
+     * @var float|null Token amount in ether.
+     */
+    private $tokenAmount;
 
     /** @var int|null */
     private $hashFunctionId;
+
+    /** @var int|null */
+    private $scoreFunctionId;
 
     public function __construct()
     {
@@ -79,23 +87,23 @@ class PublishOptions extends RequestOptions
     }
 
     /**
-     * Returns bid amount in ether.
+     * Returns token amount in ether.
      * @return float|null
      */
-    public function getBidAmount(): ?float
+    public function getTokenAmount(): ?float
     {
-        return $this->bidAmount;
+        return $this->tokenAmount;
     }
 
     /**
-     * Sets bid amount in ether.
-     * If bid amount is not set, bid suggestion will be taken
+     * Sets token amount in ether.
+     * If token amount is not set, bid suggestion will be taken
      * from the network.
-     * @param float|null $bidAmount
+     * @param float|null $tokenAmount
      */
-    public function setBidAmount(?float $bidAmount): void
+    public function setTokenAmount(?float $tokenAmount): void
     {
-        $this->bidAmount = $bidAmount;
+        $this->tokenAmount = $tokenAmount;
     }
 
     /**
@@ -112,6 +120,22 @@ class PublishOptions extends RequestOptions
     public function setHashFunctionId(?int $hashFunctionId): void
     {
         $this->hashFunctionId = $hashFunctionId;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getScoreFunctionId(): ?int
+    {
+        return $this->scoreFunctionId;
+    }
+
+    /**
+     * @param int|null $scoreFunctionId
+     */
+    public function setScoreFunctionId(?int $scoreFunctionId): void
+    {
+        $this->scoreFunctionId = $scoreFunctionId;
     }
 
     /**
@@ -134,6 +158,7 @@ class PublishOptions extends RequestOptions
         $options->setLocalStore(false);
         $options->setEpochsNum(Params::PUBLISH_DEFAULT_EPOCH_NUM);
         $options->setHashFunctionId(Params::DEFAULT_HASH_FUNCTION_ID);
+        $options->setScoreFunctionId(Params::DEFAULT_SCORE_FUNCTION_ID);
         $options->setBlockchainConfig(new BlockchainConfig());
         $options->setHttpConfig(new HttpConfig());
 

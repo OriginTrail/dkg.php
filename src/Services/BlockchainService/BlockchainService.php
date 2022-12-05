@@ -30,7 +30,7 @@ class BlockchainService implements BlockchainServiceInterface
         $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($options->getBidAmount(), $config);
+        $proxy->increaseAllowance($options->getTokenAmount(), $config);
 
         $createAssetArgs = [
             $asset->getAssertionId(),
@@ -38,7 +38,8 @@ class BlockchainService implements BlockchainServiceInterface
             $asset->getTriplesCount(),
             $asset->getChunkCount(),
             $options->getEpochsNum(),
-            $options->getBidAmount()
+            $options->getTokenAmount(),
+            $options->getScoreFunctionId()
         ];
 
         [$contractAddress, $tokenId] = $proxy->createAsset($createAssetArgs, $config);
@@ -73,7 +74,7 @@ class BlockchainService implements BlockchainServiceInterface
         $blockchainName = $config->getBlockchainName();
         $proxy = $this->web3ProxyManager->getProxy($blockchainName);
 
-        $proxy->increaseAllowance($options->getBidAmount(), $config);
+        $proxy->increaseAllowance($options->getTokenAmount(), $config);
 
         $updateAssetArgs = [
             $asset->getTokenId(),
@@ -82,7 +83,7 @@ class BlockchainService implements BlockchainServiceInterface
             $asset->getTriplesCount(),
             $asset->getChunkCount(),
             $options->getEpochsNum(),
-            $options->getBidAmount()
+            $options->getTokenAmount()
         ];
 
         $proxy->updateAsset($updateAssetArgs, $config);

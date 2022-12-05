@@ -10,7 +10,8 @@ class Params
     public const BLOCKCHAIN_DEFAULT_NUM_OF_RETRIES = 60;
     public const BLOCKCHAIN_DEFAULT_POLL_FREQUENCY_IN_MS = 750;
 
-    public const DEFAULT_HASH_FUNCTION_ID = 0;
+    public const DEFAULT_HASH_FUNCTION_ID = 1;
+    public const DEFAULT_SCORE_FUNCTION_ID = 1;
 
     public const PUBLISH_DEFAULT_EPOCH_NUM = 5;
     public const PUBLISH_TYPE_ASSET = 'asset';

@@ -154,6 +154,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "assertionContract",
+    "outputs": [
+      {
+        "internalType": "contract Assertion",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -204,7 +217,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getAssertionByIndex",
+    "name": "getAssertionIdByIndex",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -223,7 +236,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getAssertionsLength",
+    "name": "getAssertionIdsLength",
     "outputs": [
       {
         "internalType": "uint256",
@@ -242,7 +255,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getLatestAssertion",
+    "name": "getLatestAssertionId",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -285,19 +298,6 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "name",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -371,6 +371,19 @@
     "name": "safeTransferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "serviceAgreementV1",
+    "outputs": [
+      {
+        "internalType": "contract ServiceAgreementV1",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -466,36 +479,61 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "name",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "assertionId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint128",
-        "name": "size",
-        "type": "uint128"
-      },
-      {
-        "internalType": "uint32",
-        "name": "triplesNumber",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint96",
-        "name": "chunksNumber",
-        "type": "uint96"
-      },
-      {
-        "internalType": "uint16",
-        "name": "epochsNumber",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint96",
-        "name": "tokenAmount",
-        "type": "uint96"
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "assertionId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint128",
+            "name": "size",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint32",
+            "name": "triplesNumber",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint96",
+            "name": "chunksNumber",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint16",
+            "name": "epochsNumber",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint96",
+            "name": "tokenAmount",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scoreFunctionId",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct ContentAsset.AssetInputArgs",
+        "name": "args",
+        "type": "tuple"
       }
     ],
     "name": "createAsset",
@@ -511,34 +549,46 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes32",
-        "name": "assertionId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint128",
-        "name": "size",
-        "type": "uint128"
-      },
-      {
-        "internalType": "uint32",
-        "name": "triplesNumber",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint96",
-        "name": "chunksNumber",
-        "type": "uint96"
-      },
-      {
-        "internalType": "uint16",
-        "name": "epochsNumber",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint96",
-        "name": "tokenAmount",
-        "type": "uint96"
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "assertionId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint128",
+            "name": "size",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint32",
+            "name": "triplesNumber",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint96",
+            "name": "chunksNumber",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint16",
+            "name": "epochsNumber",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint96",
+            "name": "tokenAmount",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scoreFunctionId",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct ContentAsset.AssetInputArgs",
+        "name": "args",
+        "type": "tuple"
       }
     ],
     "name": "updateAsset",
@@ -554,7 +604,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getAssertions",
+    "name": "getAssertionIds",
     "outputs": [
       {
         "internalType": "bytes32[]",

@@ -63,11 +63,13 @@ class AssetService implements AssetServiceInterface
 
         $assertionSize = AssertionTools::getSizeInBytes($assertion);
 
-        if (!$options->getBidAmount()) {
+        // if no token amount is set by user
+        // read it from the network
+        if (!$options->getTokenAmount()) {
             $mergedConfig = $this->blockchainService->getMergedConfig($options->getBlockchainConfig());
             $options->setBlockchainConfig($mergedConfig);
-            $bidAmount = $this->nodeProxy->getBidSuggestion($assertionSize, $options);
-            $options->setBidAmount($bidAmount);
+            $bidSuggestion = $this->nodeProxy->getBidSuggestion($assertionSize, $options);
+            $options->setTokenAmount($bidSuggestion);
         }
 
         $asset = new Asset();

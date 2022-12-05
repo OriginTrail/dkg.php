@@ -143,10 +143,10 @@ class Web3Proxy implements Web3ProxyInterface
         );
         $this->hubContract->at($hubContractAddress);
 
-        $serviceAgreementStorageContractAddress = $this->getContractAddress(AbiManager::SERVICE_AGREEMENT_STORAGE);
+        $serviceAgreementStorageContractAddress = $this->getContractAddress(AbiManager::SERVICE_AGREEMENT);
         $this->serviceAgreementStorageContract = new Contract(
             $this->web3->getProvider(),
-            $this->abiManager->getAbiStringified(AbiManager::SERVICE_AGREEMENT_STORAGE)
+            $this->abiManager->getAbiStringified(AbiManager::SERVICE_AGREEMENT)
         );
         $this->serviceAgreementStorageContract->at($serviceAgreementStorageContractAddress);
 
@@ -156,13 +156,6 @@ class Web3Proxy implements Web3ProxyInterface
             $this->abiManager->getAbiStringified(AbiManager::CONTENT_ASSET)
         );
         $this->contentAssetContract->at($contentAssetContractAddress);
-
-        $assertionRegistryAddress = $this->getContractAddress(AbiManager::ASSERTION_REGISTRY);
-        $this->assertionRegistryContract = new Contract(
-            $this->web3->getProvider(),
-            $this->abiManager->getAbiStringified(AbiManager::ASSERTION_REGISTRY)
-        );
-        $this->assertionRegistryContract->at($assertionRegistryAddress);
 
         $tokenAddress = $this->getContractAddress(AbiManager::ERC20_TOKEN);
         $this->tokenContract = new Contract(

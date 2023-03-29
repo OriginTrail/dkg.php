@@ -3,7 +3,7 @@
     "description": "PHP library for interaction with the OriginTrail Decentralized Knowledge Graph",
     "type": "library",
     "license": "Apache-2.0",
-    "version": "0.5.2",
+    "version": "1.0.0",
     "keywords": [
         "origintrail",
         "knowledge",
@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
-        "guzzlehttp/guzzle": "^6",
+        "guzzlehttp/guzzle": "^7",
         "ext-json": "*",
         "digitalbazaar/json-ld": "^0.4.7",
         "kornrunner/keccak": "^1.1",
